@@ -232,6 +232,15 @@
         <label>Nome do Técnico</label>
         <input type="text" id="tec_nome">
 
+        <!-- NOVO CAMPO UF AQUI -->
+        <label>UF</label>
+        <select id="uf">
+            <option value="">Selecione...</option>
+            <option value="RJ">RJ</option>
+            <option value="ES">ES</option>
+        </select>
+        <!-- FIM DA ALTERAÇÃO -->
+
         <label>Data do Desconto</label>
         <input type="date" id="data_desc">
 
@@ -358,7 +367,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Exponha funções para o escopo do envio
         window._imagensSelecionadas = imagensSelecionadas;
         window._atualizarPreview = atualizarPreview;
 
@@ -367,7 +375,6 @@ document.addEventListener('DOMContentLoaded', function () {
             enviarFormulario();
         });
 
-        // Funções existentes (reaproveitadas)
         window.addMaterial = function () {
             const table = document.getElementById("materialsTable");
             const row = table.insertRow();
@@ -393,31 +400,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         window.enviarFormulario = function () {
             try {
-                // mostra mensagem
                 document.getElementById("successBox").style.display = "block";
-                console.log('Formulário enviado — limpando campos.');
 
-                // limpar inputs text / date / textarea
                 document.getElementById("tec_nome").value = "";
+                document.getElementById("uf").value = "";
                 document.getElementById("data_desc").value = "";
                 document.getElementById("resp").value = "";
                 document.getElementById("just").value = "";
 
-                // limpar selects
                 document.getElementById("motivoSelect").value = "";
                 document.getElementById("vivo").value = "";
                 document.getElementById("rh").value = "";
                 document.getElementById("assinatura").value = "";
 
-                // limpar arquivos
                 document.getElementById("pdf").value = "";
                 comprovantesInput.value = "";
 
-                // limpar imagens em memória e preview
                 imagensSelecionadas.length = 0;
                 atualizarPreview();
 
-                // limpar tabela (recria o cabeçalho)
                 const tabela = document.getElementById("materialsTable");
                 tabela.innerHTML = `
                     <tr>
@@ -427,21 +428,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     </tr>
                 `;
 
-                // reset total
                 document.getElementById("totalValue").innerText = "0.00";
 
-                // esconder mensagem após 4s
                 setTimeout(() => {
                     document.getElementById("successBox").style.display = "none";
                 }, 4000);
 
             } catch (err) {
                 console.error('Erro em enviarFormulario:', err);
-                alert('Ocorreu um erro ao enviar o formulário. Veja o console para detalhes.');
+                alert('Ocorreu um erro ao enviar o formulário.');
             }
         };
-
-        console.log('Scripts inicializados com sucesso.');
 
     } catch (err) {
         console.error('Erro ao inicializar scripts:', err);
@@ -451,6 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
 
 
 
