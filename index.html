@@ -21,22 +21,21 @@
         padding: 0;
     }
 
-    /* HEADER PROFISSIONAL AJUSTADO */
     .header {
         width: 100%;
         padding: 40px 20px;
         background: #0A3D62;
         color: white;
-        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
+        position: relative;
         box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     .header img {
-        height: 105px;  /* LOGO AUMENTADA */
+        height: 105px;
         position: absolute;
         left: 25px;
         top: 50%;
@@ -44,24 +43,17 @@
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
     }
 
-    /* TÍTULO COM APTOS DISPLAY, SOMBRA LEVE */
     .header-title {
         font-family: 'Aptos Display', 'Segoe UI', Arial, sans-serif;
         font-size: 34px;
         font-weight: 900;
         letter-spacing: 2px;
         text-transform: uppercase;
-        font-smooth: always;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-
-        /* SOMBRA LEVE */
         text-shadow: 
             0 0 4px rgba(255,255,255,0.65),
             0 2px 2px rgba(0,0,0,0.35);
     }
 
-    /* Container principal */
     .container {
         max-width: 960px;
         background: #FFFFFF;
@@ -95,8 +87,8 @@
         border-radius: 8px;
         border: 1px solid #C5D9E8;
         background: #F9FCFF;
-        box-sizing: border-box;
         transition: 0.2s;
+        box-sizing: border-box;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -112,8 +104,8 @@
     .materials-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
         background: white;
+        margin-top: 15px;
     }
 
     .materials-table th {
@@ -121,13 +113,11 @@
         color: white;
         padding: 12px;
         text-align: left;
-        font-size: 15px;
     }
 
     .materials-table td {
         border: 1px solid #ddd;
         padding: 10px;
-        font-size: 14px;
     }
 
     .btn-add {
@@ -153,7 +143,6 @@
         padding: 7px 14px;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 14px;
     }
 
     .materials-table button:hover {
@@ -168,8 +157,8 @@
         font-weight: bold;
         margin-top: 25px;
         text-align: right;
-        color: #0A3D62;
         border: 1px solid #A3D4FF;
+        color: #0A3D62;
     }
 
     .submit-btn {
@@ -184,8 +173,8 @@
         font-weight: bold;
         cursor: pointer;
         transition: 0.3s;
-        text-transform: uppercase;
         letter-spacing: 1px;
+        text-transform: uppercase;
     }
 
     .submit-btn:hover {
@@ -196,7 +185,6 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <img src="logohallen.png" alt="Logo Hallen">
     <div class="header-title">Planilha Controle de Desconto RJ x ES</div>
@@ -221,11 +209,6 @@
         <option value="reversa">Reversa</option>
         <option value="furto">Furto</option>
     </select>
-
-    <div id="serial-box" style="display:none;">
-        <label>Nº do Serializado</label>
-        <input type="text">
-    </div>
 
     <div class="section-title">Informações do Desconto</div>
 
@@ -276,20 +259,15 @@
     <textarea></textarea>
 
     <label>Carta de Desconto (PDF)</label>
-    <input type="file" accept=".pdf">
+    <input type="file" accept="application/pdf">
 
     <label>Comprovante de Recebimento (PDF)</label>
-    <input type="file" accept=".pdf">
+    <input type="file" accept="application/pdf">
 
     <button class="submit-btn">Enviar Formulário</button>
 </div>
 
 <script>
-document.getElementById("motivo").addEventListener("change", function () {
-    let box = document.getElementById("serial-box");
-    box.style.display = (this.value === "aging" || this.value === "reversa") ? "block" : "none";
-});
-
 function addMaterial() {
     let table = document.getElementById("materialsTable");
     let row = table.insertRow();
@@ -316,6 +294,8 @@ function calcularTotal() {
 
 </body>
 </html>
+
+
 
 
 
