@@ -91,12 +91,6 @@
         box-sizing: border-box;
     }
 
-    input:focus, select:focus, textarea:focus {
-        border-color: #1B7FC2;
-        outline: none;
-        box-shadow: 0 0 6px #A3D4FF;
-    }
-
     textarea {
         min-height: 90px;
     }
@@ -172,16 +166,22 @@
         font-size: 20px;
         font-weight: bold;
         cursor: pointer;
-        transition: 0.3s;
-        letter-spacing: 1px;
         text-transform: uppercase;
     }
 
-    .submit-btn:hover {
-        background: #062A44;
+    .success-box {
+        margin-top: 25px;
+        display: none;
+        background: #D4EDDA;
+        color: #155724;
+        border: 1px solid #A3D4A5;
+        padding: 18px;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
     }
 
-    /* Preview de imagens */
     .image-preview-box {
         display: flex;
         flex-wrap: wrap;
@@ -214,9 +214,6 @@
         width: 26px;
         height: 26px;
         cursor: pointer;
-        font-size: 14px;
-        line-height: 26px;
-        text-align: center;
     }
 </style>
 </head>
@@ -230,81 +227,87 @@
 
 <div class="container">
 
-    <div class="section-title">Dados do Técnico</div>
+    <div id="successBox" class="success-box">✔ Formulário enviado com sucesso!</div>
 
-    <label>Nome do Técnico</label>
-    <input type="text">
+    <div id="formulario">
 
-    <label>Data do Desconto</label>
-    <input type="date">
+        <div class="section-title">Dados do Técnico</div>
 
-    <label>Motivo do Desconto</label>
-    <select id="motivo">
-        <option value="">Selecione...</option>
-        <option value="nada consta">Nada Consta</option>
-        <option value="perda">Perda</option>
-        <option value="aging">Aging</option>
-        <option value="reversa">Reversa</option>
-        <option value="furto">Furto</option>
-    </select>
+        <label>Nome do Técnico</label>
+        <input type="text" id="tec_nome">
 
-    <div class="section-title">Informações do Desconto</div>
+        <label>Data do Desconto</label>
+        <input type="date" id="data_desc">
 
-    <label>Descontado pela Vivo?</label>
-    <select>
-        <option value="">Selecione...</option>
-        <option value="sim">Sim</option>
-        <option value="nao">Não</option>
-    </select>
+        <label>Motivo do Desconto</label>
+        <select id="motivo">
+            <option value="">Selecione...</option>
+            <option value="nada consta">Nada Consta</option>
+            <option value="perda">Perda</option>
+            <option value="aging">Aging</option>
+            <option value="reversa">Reversa</option>
+            <option value="furto">Furto</option>
+        </select>
 
-    <label>Desconto enviado para o RH?</label>
-    <select>
-        <option value="">Selecione...</option>
-        <option value="sim">Sim</option>
-        <option value="nao">Não</option>
-    </select>
+        <div class="section-title">Informações do Desconto</div>
 
-    <label>Assinatura do Técnico</label>
-    <select>
-        <option value="">Selecione...</option>
-        <option value="sim">Sim</option>
-        <option value="nao">Não</option>
-        <option value="testemunha">Testemunha</option>
-    </select>
+        <label>Descontado pela Vivo?</label>
+        <select id="vivo">
+            <option value="">Selecione...</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+        </select>
 
-    <div class="section-title">Materiais / Ferramental / Serializados</div>
+        <label>Desconto enviado para o RH?</label>
+        <select id="rh">
+            <option value="">Selecione...</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+        </select>
 
-    <table class="materials-table" id="materialsTable">
-        <tr>
-            <th>Descrição</th>
-            <th>Valor (R$)</th>
-            <th>Ação</th>
-        </tr>
-    </table>
+        <label>Assinatura do Técnico</label>
+        <select id="assinatura">
+            <option value="">Selecione...</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+            <option value="testemunha">Testemunha</option>
+        </select>
 
-    <button class="btn-add" onclick="addMaterial()">+ Adicionar Descrição</button>
+        <div class="section-title">Materiais / Ferramental / Serializados</div>
 
-    <div class="total-box">
-        Valor Total: R$ <span id="totalValue">0.00</span>
+        <table class="materials-table" id="materialsTable">
+            <tr>
+                <th>Descrição</th>
+                <th>Valor (R$)</th>
+                <th>Ação</th>
+            </tr>
+        </table>
+
+        <button class="btn-add" onclick="addMaterial()">+ Adicionar Descrição</button>
+
+        <div class="total-box">
+            Valor Total: R$ <span id="totalValue">0.00</span>
+        </div>
+
+        <div class="section-title">Responsável e Evidências</div>
+
+        <label>Responsável pelo Desconto</label>
+        <input type="text" id="resp">
+
+        <label>Justificativa</label>
+        <textarea id="just"></textarea>
+
+        <label>Carta de Desconto (PDF)</label>
+        <input type="file" id="pdf" accept="application/pdf">
+
+        <label>Comprovante de Recebimento (Até 5 Imagens)</label>
+        <input type="file" id="comprovantes" accept="image/*" multiple>
+
+        <div id="preview" class="image-preview-box"></div>
+
+        <button class="submit-btn" onclick="enviarFormulario()">Enviar Formulário</button>
+
     </div>
-
-    <div class="section-title">Responsável e Evidências</div>
-
-    <label>Responsável pelo Desconto</label>
-    <input type="text">
-
-    <label>Justificativa</label>
-    <textarea></textarea>
-
-    <label>Carta de Desconto (PDF)</label>
-    <input type="file" accept="application/pdf">
-
-    <label>Comprovante de Recebimento (Até 5 Imagens)</label>
-    <input type="file" id="comprovantes" accept="image/*" multiple>
-
-    <div id="preview" class="image-preview-box"></div>
-
-    <button class="submit-btn">Enviar Formulário</button>
 </div>
 
 <script>
@@ -331,7 +334,6 @@ function calcularTotal() {
     document.getElementById("totalValue").innerText = total.toFixed(2);
 }
 
-/* ---------------------- PREVIEW DE IMAGENS (ATÉ 5) ------------------- */
 let imagensSelecionadas = [];
 
 document.getElementById("comprovantes").addEventListener("change", function () {
@@ -370,10 +372,46 @@ function removerImagem(i) {
     imagensSelecionadas.splice(i, 1);
     atualizarPreview();
 }
+
+/* ================================
+   FUNÇÃO FINAL: ENVIAR FORMULÁRIO
+   ================================ */
+function enviarFormulario() {
+
+    /* Mostrar mensagem */
+    document.getElementById("successBox").style.display = "block";
+
+    /* Limpar tudo */
+    document.querySelectorAll("input[type=text], input[type=date], textarea").forEach(i => i.value = "");
+    document.querySelectorAll("select").forEach(s => s.value = "");
+    document.getElementById("pdf").value = "";
+    document.getElementById("comprovantes").value = "";
+    imagensSelecionadas = [];
+    atualizarPreview();
+
+    /* Limpar a tabela */
+    let tabela = document.getElementById("materialsTable");
+    tabela.innerHTML = `
+        <tr>
+            <th>Descrição</th>
+            <th>Valor (R$)</th>
+            <th>Ação</th>
+        </tr>
+    `;
+
+    /* Reset total */
+    document.getElementById("totalValue").innerText = "0.00";
+
+    /* Ocultar mensagem depois de 4 segundos */
+    setTimeout(() => {
+        document.getElementById("successBox").style.display = "none";
+    }, 4000);
+}
 </script>
 
 </body>
 </html>
+
 
 
 
