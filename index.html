@@ -5,8 +5,13 @@
 <title>Planilha Controle de Desconto RJ x ES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- APTOS DISPLAY (fonte padrão equivalente ao Aptowns Display) -->
-<link href="https://fonts.googleapis.com/css2?family=Aptos+Display:wght@300;400;700;900&display=swap" rel="stylesheet">
+<!-- Fonte Aptos Display -->
+<style>
+@font-face {
+    font-family: 'Aptos Display';
+    src: local('Aptos Display'), local('AptosDisplay');
+}
+</style>
 
 <style>
     body {
@@ -19,7 +24,7 @@
     /* HEADER PROFISSIONAL AJUSTADO */
     .header {
         width: 100%;
-        padding: 35px 20px 35px 20px;
+        padding: 40px 20px;
         background: #0A3D62;
         color: white;
         position: relative;
@@ -31,24 +36,29 @@
     }
 
     .header img {
-        height: 80px;
+        height: 105px;  /* LOGO AUMENTADA */
         position: absolute;
         left: 25px;
         top: 50%;
         transform: translateY(-50%);
-        filter: drop-shadow(0 3px 4px rgba(255,255,255,0.5));
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
     }
 
-    /* TÍTULO USANDO APTOS DISPLAY + SOMBRA LEVE */
+    /* TÍTULO COM APTOS DISPLAY, SOMBRA LEVE */
     .header-title {
-        font-family: "Aptos Display", sans-serif;
-        font-size: 32px;
+        font-family: 'Aptos Display', 'Segoe UI', Arial, sans-serif;
+        font-size: 34px;
         font-weight: 900;
-        letter-spacing: 1.2px;
+        letter-spacing: 2px;
         text-transform: uppercase;
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
 
-        /* sombra leve */
-        text-shadow: 1px 1px 2px rgba(255,255,255,0.55);
+        /* SOMBRA LEVE */
+        text-shadow: 
+            0 0 4px rgba(255,255,255,0.65),
+            0 2px 2px rgba(0,0,0,0.35);
     }
 
     /* Container principal */
@@ -62,17 +72,13 @@
     }
 
     .section-title {
-        font-family: "Aptos Display", sans-serif;
         font-size: 20px;
         margin-top: 25px;
         margin-bottom: 10px;
-        font-weight: 800;
+        font-weight: bold;
         color: #0A3D62;
         border-left: 5px solid #1B7FC2;
         padding-left: 10px;
-
-        /* sombra suave */
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
     }
 
     label {
@@ -180,7 +186,6 @@
         transition: 0.3s;
         text-transform: uppercase;
         letter-spacing: 1px;
-        font-family: "Aptos Display", sans-serif;
     }
 
     .submit-btn:hover {
@@ -311,6 +316,7 @@ function calcularTotal() {
 
 </body>
 </html>
+
 
 
 
