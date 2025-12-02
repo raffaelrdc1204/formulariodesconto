@@ -13,26 +13,48 @@
         padding: 0;
     }
 
-    /* Header profissional com logo */
+    /* HEADER PROFISSIONAL AJUSTADO */
     .header {
         width: 100%;
-        padding: 25px 25px 25px 120px;
+        padding: 35px 20px 35px 20px;
         background: #0A3D62;
         color: white;
-        font-size: 26px;
-        font-weight: bold;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+
+        /* Sombras */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     .header img {
-        height: 70px;
+        height: 80px;
         position: absolute;
-        top: 50%;
         left: 25px;
+        top: 50%;
         transform: translateY(-50%);
+        filter: drop-shadow(0 3px 4px rgba(255,255,255,0.5));
+    }
+
+    /* TÍTULO CENTRALIZADO + SOMBRA + NEGRITO + ARREDONDADO */
+    .header-title {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+
+        /* Deixa o texto “arredondado/soft” */
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        /* Sombra branca forte */
+        text-shadow: 
+            0 0 8px rgba(255,255,255,0.95),
+            0 0 14px rgba(255,255,255,0.85),
+            2px 2px 4px rgba(0,0,0,0.5);
     }
 
     /* Container principal */
@@ -58,7 +80,7 @@
     label {
         display: block;
         margin: 10px 0 6px;
-        font-weight: 600;
+        font-weight: 600`;
         color: #0A3D62;
     }
 
@@ -170,9 +192,10 @@
 
 <body>
 
+<!-- HEADER NOVO -->
 <div class="header">
     <img src="logohallen.png" alt="Logo Hallen">
-    Planilha Controle de Desconto RJ x ES
+    <div class="header-title">Planilha Controle de Desconto RJ x ES</div>
 </div>
 
 <div class="container">
@@ -289,4 +312,5 @@ function calcularTotal() {
 
 </body>
 </html>
+
 
