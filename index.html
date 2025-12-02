@@ -5,7 +5,7 @@
 <title>Planilha Controle de Desconto RJ x ES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Fonte Aptos Display -->
+<!-- Fonte Aptos Display (fallback local) -->
 <style>
 @font-face {
     font-family: 'Aptos Display';
@@ -126,9 +126,7 @@
         transition: 0.2s;
     }
 
-    .btn-add:hover {
-        background: #145A8A;
-    }
+    .btn-add:hover { background: #145A8A; }
 
     .materials-table button {
         background: #D9534F;
@@ -139,9 +137,7 @@
         cursor: pointer;
     }
 
-    .materials-table button:hover {
-        background: #B52B27;
-    }
+    .materials-table button:hover { background: #B52B27; }
 
     .total-box {
         background: #D8ECFF;
@@ -240,7 +236,7 @@
         <input type="date" id="data_desc">
 
         <label>Motivo do Desconto</label>
-        <select id="motivo">
+        <select id="motivoSelect">
             <option value="">Selecione...</option>
             <option value="nada consta">Nada Consta</option>
             <option value="perda">Perda</option>
@@ -283,7 +279,7 @@
             </tr>
         </table>
 
-        <button class="btn-add" onclick="addMaterial()">+ Adicionar Descrição</button>
+        <button class="btn-add" id="btnAddMaterial">+ Adicionar Descrição</button>
 
         <div class="total-box">
             Valor Total: R$ <span id="totalValue">0.00</span>
@@ -305,112 +301,158 @@
 
         <div id="preview" class="image-preview-box"></div>
 
-        <button class="submit-btn" onclick="enviarFormulario()">Enviar Formulário</button>
+        <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
 
     </div>
 </div>
 
 <script>
-function addMaterial() {
-    let table = document.getElementById("materialsTable");
-    let row = table.insertRow();
-    row.innerHTML = `
-        <td><input type="text" class="desc"></td>
-        <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
-        <td><button onclick="removerLinha(this)">Remover</button></td>
-    `;
-}
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        const btnAdd = document.getElementById('btnAddMaterial');
+        const btnEnviar = document.getElementById('btnEnviar');
+        const comprovantesInput = document.getElementById('comprovantes');
 
-function removerLinha(btn) {
-    btn.parentNode.parentNode.remove();
-    calcularTotal();
-}
+        btnAdd.addEventListener('click', function (e) {
+            e.preventDefault();
+            addMaterial();
+        });
 
-function calcularTotal() {
-    let total = 0;
-    document.querySelectorAll(".valor").forEach(v => {
-        if (v.value) total += parseFloat(v.value);
-    });
-    document.getElementById("totalValue").innerText = total.toFixed(2);
-}
+        // imagens
+        let imagensSelecionadas = [];
+        comprovantesInput.addEventListener('change', function () {
+            const arquivos = Array.from(this.files);
+            if (imagensSelecionadas.length + arquivos.length > 5) {
+                alert("Você só pode enviar até 5 imagens.");
+                return;
+            }
+            arquivos.forEach(arq => {
+                const leitor = new FileReader();
+                leitor.onload = function (ev) {
+                    imagensSelecionadas.push(ev.target.result);
+                    atualizarPreview();
+                };
+                leitor.readAsDataURL(arq);
+            });
+        });
 
-let imagensSelecionadas = [];
+        function atualizarPreview() {
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '';
+            imagensSelecionadas.forEach((img, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'image-item';
+                const image = document.createElement('img');
+                image.src = img;
+                const btn = document.createElement('button');
+                btn.className = 'remove-img';
+                btn.type = 'button';
+                btn.innerText = 'X';
+                btn.addEventListener('click', () => {
+                    imagensSelecionadas.splice(index, 1);
+                    atualizarPreview();
+                });
+                wrapper.appendChild(image);
+                wrapper.appendChild(btn);
+                preview.appendChild(wrapper);
+            });
+        }
 
-document.getElementById("comprovantes").addEventListener("change", function () {
-    let arquivos = Array.from(this.files);
+        // Exponha funções para o escopo do envio
+        window._imagensSelecionadas = imagensSelecionadas;
+        window._atualizarPreview = atualizarPreview;
 
-    if (imagensSelecionadas.length + arquivos.length > 5) {
-        alert("Você só pode enviar até 5 imagens.");
-        return;
-    }
+        btnEnviar.addEventListener('click', function (e) {
+            e.preventDefault();
+            enviarFormulario();
+        });
 
-    arquivos.forEach(arq => {
-        let leitor = new FileReader();
-        leitor.onload = function (e) {
-            imagensSelecionadas.push(e.target.result);
-            atualizarPreview();
+        // Funções existentes (reaproveitadas)
+        window.addMaterial = function () {
+            const table = document.getElementById("materialsTable");
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td><input type="text" class="desc"></td>
+                <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
+                <td><button onclick="removerLinha(this)">Remover</button></td>
+            `;
         };
-        leitor.readAsDataURL(arq);
-    });
+
+        window.removerLinha = function (btn) {
+            btn.parentNode.parentNode.remove();
+            calcularTotal();
+        };
+
+        window.calcularTotal = function () {
+            let total = 0;
+            document.querySelectorAll(".valor").forEach(v => {
+                if (v.value) total += parseFloat(v.value);
+            });
+            document.getElementById("totalValue").innerText = total.toFixed(2);
+        };
+
+        window.enviarFormulario = function () {
+            try {
+                // mostra mensagem
+                document.getElementById("successBox").style.display = "block";
+                console.log('Formulário enviado — limpando campos.');
+
+                // limpar inputs text / date / textarea
+                document.getElementById("tec_nome").value = "";
+                document.getElementById("data_desc").value = "";
+                document.getElementById("resp").value = "";
+                document.getElementById("just").value = "";
+
+                // limpar selects
+                document.getElementById("motivoSelect").value = "";
+                document.getElementById("vivo").value = "";
+                document.getElementById("rh").value = "";
+                document.getElementById("assinatura").value = "";
+
+                // limpar arquivos
+                document.getElementById("pdf").value = "";
+                comprovantesInput.value = "";
+
+                // limpar imagens em memória e preview
+                imagensSelecionadas.length = 0;
+                atualizarPreview();
+
+                // limpar tabela (recria o cabeçalho)
+                const tabela = document.getElementById("materialsTable");
+                tabela.innerHTML = `
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor (R$)</th>
+                        <th>Ação</th>
+                    </tr>
+                `;
+
+                // reset total
+                document.getElementById("totalValue").innerText = "0.00";
+
+                // esconder mensagem após 4s
+                setTimeout(() => {
+                    document.getElementById("successBox").style.display = "none";
+                }, 4000);
+
+            } catch (err) {
+                console.error('Erro em enviarFormulario:', err);
+                alert('Ocorreu um erro ao enviar o formulário. Veja o console para detalhes.');
+            }
+        };
+
+        console.log('Scripts inicializados com sucesso.');
+
+    } catch (err) {
+        console.error('Erro ao inicializar scripts:', err);
+    }
 });
-
-function atualizarPreview() {
-    let preview = document.getElementById("preview");
-    preview.innerHTML = "";
-
-    imagensSelecionadas.forEach((img, index) => {
-        preview.innerHTML += `
-            <div class="image-item">
-                <img src="${img}">
-                <button class="remove-img" onclick="removerImagem(${index})">X</button>
-            </div>
-        `;
-    });
-}
-
-function removerImagem(i) {
-    imagensSelecionadas.splice(i, 1);
-    atualizarPreview();
-}
-
-/* ================================
-   FUNÇÃO FINAL: ENVIAR FORMULÁRIO
-   ================================ */
-function enviarFormulario() {
-
-    /* Mostrar mensagem */
-    document.getElementById("successBox").style.display = "block";
-
-    /* Limpar tudo */
-    document.querySelectorAll("input[type=text], input[type=date], textarea").forEach(i => i.value = "");
-    document.querySelectorAll("select").forEach(s => s.value = "");
-    document.getElementById("pdf").value = "";
-    document.getElementById("comprovantes").value = "";
-    imagensSelecionadas = [];
-    atualizarPreview();
-
-    /* Limpar a tabela */
-    let tabela = document.getElementById("materialsTable");
-    tabela.innerHTML = `
-        <tr>
-            <th>Descrição</th>
-            <th>Valor (R$)</th>
-            <th>Ação</th>
-        </tr>
-    `;
-
-    /* Reset total */
-    document.getElementById("totalValue").innerText = "0.00";
-
-    /* Ocultar mensagem depois de 4 segundos */
-    setTimeout(() => {
-        document.getElementById("successBox").style.display = "none";
-    }, 4000);
-}
 </script>
 
 </body>
 </html>
+
+
 
 
 
