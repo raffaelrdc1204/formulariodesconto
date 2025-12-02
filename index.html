@@ -180,6 +180,44 @@
     .submit-btn:hover {
         background: #062A44;
     }
+
+    /* Preview de imagens */
+    .image-preview-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .image-item {
+        position: relative;
+        width: 130px;
+        height: 130px;
+    }
+
+    .image-item img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid #C5D9E8;
+    }
+
+    .remove-img {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #D9534F;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 26px;
+        text-align: center;
+    }
 </style>
 </head>
 
@@ -261,8 +299,10 @@
     <label>Carta de Desconto (PDF)</label>
     <input type="file" accept="application/pdf">
 
-    <label>Comprovante de Recebimento (PDF)</label>
-    <input type="file" accept="application/pdf">
+    <label>Comprovante de Recebimento (Até 5 Imagens)</label>
+    <input type="file" id="comprovantes" accept="image/*" multiple>
+
+    <div id="preview" class="image-preview-box"></div>
 
     <button class="submit-btn">Enviar Formulário</button>
 </div>
@@ -290,10 +330,51 @@ function calcularTotal() {
     });
     document.getElementById("totalValue").innerText = total.toFixed(2);
 }
+
+/* ---------------------- PREVIEW DE IMAGENS (ATÉ 5) ------------------- */
+let imagensSelecionadas = [];
+
+document.getElementById("comprovantes").addEventListener("change", function () {
+    let arquivos = Array.from(this.files);
+
+    if (imagensSelecionadas.length + arquivos.length > 5) {
+        alert("Você só pode enviar até 5 imagens.");
+        return;
+    }
+
+    arquivos.forEach(arq => {
+        let leitor = new FileReader();
+        leitor.onload = function (e) {
+            imagensSelecionadas.push(e.target.result);
+            atualizarPreview();
+        };
+        leitor.readAsDataURL(arq);
+    });
+});
+
+function atualizarPreview() {
+    let preview = document.getElementById("preview");
+    preview.innerHTML = "";
+
+    imagensSelecionadas.forEach((img, index) => {
+        preview.innerHTML += `
+            <div class="image-item">
+                <img src="${img}">
+                <button class="remove-img" onclick="removerImagem(${index})">X</button>
+            </div>
+        `;
+    });
+}
+
+function removerImagem(i) {
+    imagensSelecionadas.splice(i, 1);
+    atualizarPreview();
+}
 </script>
 
 </body>
 </html>
+
 
 
 
