@@ -5,6 +5,7 @@
 <title>Formulário Controle de Desconto RJ x ES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- SDK Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -198,7 +199,7 @@ textarea {
 
     <div id="successBox" class="success-box">✔ Formulário enviado com sucesso!</div>
 
-    <div id="formulario">
+    <form id="formulario">
 
         <div class="section-title">Dados do Técnico</div>
 
@@ -259,7 +260,7 @@ textarea {
             </tr>
         </table>
 
-        <button class="btn-add" id="btnAddMaterial">+ Adicionar Descrição</button>
+        <button class="btn-add" type="button" id="btnAddMaterial">+ Adicionar Descrição</button>
 
         <div class="total-box">
             Valor Total: R$ <span id="totalValue">0.00</span>
@@ -283,13 +284,16 @@ textarea {
 
         <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
 
-    </div>
+    </form>
 </div>
 
 <script>
-/* ----------------- CONFIGURAÇÃO SUPABASE ----------------- */
-const SUPABASE_URL = "COLE_AQUI_SUA_URL";
-const SUPABASE_KEY = "COLE_AQUI_SUA_ANON_KEY";
+/* --------------------------------------------------------
+   CONFIGURAÇÃO SUPABASE
+-------------------------------------------------------- */
+const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ----------------- SCRIPT PRINCIPAL ----------------- */
@@ -307,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
         row.innerHTML = `
             <td><input type="text" class="desc"></td>
             <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
-            <td><button onclick="removerLinha(this)">Remover</button></td>
+            <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
         `;
     });
 
@@ -348,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             div.innerHTML = `
                 <img src="${img.preview}">
-                <button class="remove-img" onclick="removerImagem(${index})">X</button>
+                <button class="remove-img" type="button" onclick="removerImagem(${index})">X</button>
             `;
 
             preview.appendChild(div);
@@ -376,6 +380,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const responsavel = document.getElementById("resp").value;
             const justificativa = document.getElementById("just").value;
 
+            /* -------- CAMPOS OBRIGATÓRIOS -------- */
+            if (!tec_nome || !uf || !data_desc || !motivo) {
+                alert("Preencha todos os campos obrigatórios.");
+                return;
+            }
+
             /* -------- CAPTURAR MATERIAIS -------- */
             const materiais = [];
             document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
@@ -398,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (pdfFile) {
                 const pdfPath = `pdfs/pdf_${Date.now()}.pdf`;
-                const { data, error } = await supabase.storage
+                const { error } = await supabase.storage
                     .from("descontos")
                     .upload(pdfPath, pdfFile);
 
@@ -412,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             for (const img of imagensSelecionadas) {
                 const filePath = `imagens/${Date.now()}_${img.file.name}`;
-                const { error, data } = await supabase.storage
+                const { error } = await supabase.storage
                     .from("descontos")
                     .upload(filePath, img.file);
 
@@ -481,6 +491,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
+
 
 
 
