@@ -311,11 +311,11 @@ textarea {
    CONFIGURAÇÃO SUPABASE
 -------------------------------------------------------- */
 const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
 
-const BUCKET_NAME = "descontos"; // ajuste se necessário
+const BUCKET_NAME = "descontos";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ----------------- SCRIPT PRINCIPAL ----------------- */
 document.addEventListener('DOMContentLoaded', function () {
@@ -584,6 +584,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
 
 
 
