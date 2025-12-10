@@ -9,31 +9,207 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* ===== Estilos básicos ===== */
-@font-face { font-family: 'Aptos Display'; src: local('Aptos Display'), local('AptosDisplay'); }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #F5F7FA; margin: 0; padding: 0; }
-.header { width: 100%; padding: 40px 20px; background: #0A3D62; color: white; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
-.header img { height: 105px; position: absolute; left: 25px; top: 50%; transform: translateY(-50%); }
-.header-title { font-family: 'Aptos Display'; font-size: 34px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
-.container { max-width: 960px; background: #FFFFFF; margin: 40px auto; padding: 35px; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.1); }
-.section-title { font-size: 20px; margin-top: 25px; margin-bottom: 10px; font-weight: bold; color: #0A3D62; border-left: 5px solid #1B7FC2; padding-left: 10px; }
-label { display: block; margin: 10px 0 6px; font-weight: 600; color: #0A3D62; }
-input, select, textarea { width: 100%; padding: 13px; font-size: 15px; border-radius: 8px; border: 1px solid #C5D9E8; background: #F9FCFF; box-sizing: border-box; }
-textarea { min-height: 90px; }
-.materials-table { width: 100%; border-collapse: collapse; background: white; margin-top: 15px; }
-.materials-table th { background: #0A3D62; color: white; padding: 12px; text-align: left; }
-.materials-table td { border: 1px solid #ddd; padding: 10px; vertical-align: middle; }
-.materials-table input { width: 100%; box-sizing: border-box; padding: 8px; }
-.btn-add { margin-top: 20px; background: #1B7FC2; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
-.total-box { background: #D8ECFF; padding: 18px; border-radius: 10px; font-size: 22px; font-weight: bold; margin-top: 25px; text-align: right; }
-.submit-btn { margin-top: 35px; width: 100%; padding: 17px; background: #0A3D62; color: white; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; }
-.success-box { margin-top: 25px; display: none; background: #D4EDDA; color: #155724; border: 1px solid #A3D4A5; padding: 18px; border-radius: 10px; font-size: 18px; font-weight: bold; text-align: center; }
-.error-box { margin-top: 15px; display: none; background: #F8D7DA; color: #721c24; border: 1px solid #F5C6CB; padding: 12px; border-radius: 8px; }
-.image-preview-box { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
-.image-item { position: relative; width: 130px; height: 130px; }
-.image-item img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
-.remove-img { position: absolute; top: -8px; right: -8px; background: #D9534F; color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; }
-.small-muted { font-size: 13px; color: #6b7280; margin-top: 6px; }
+@font-face {
+    font-family: 'Aptos Display';
+    src: local('Aptos Display'), local('AptosDisplay');
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #F5F7FA;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    width: 100%;
+    padding: 40px 20px;
+    background: #0A3D62;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.header img {
+    height: 105px;
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.header-title {
+    font-family: 'Aptos Display';
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 960px;
+    background: #FFFFFF;
+    margin: 40px auto;
+    padding: 35px;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+}
+
+.section-title {
+    font-size: 20px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #0A3D62;
+    border-left: 5px solid #1B7FC2;
+    padding-left: 10px;
+}
+
+label {
+    display: block;
+    margin: 10px 0 6px;
+    font-weight: 600;
+    color: #0A3D62;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 13px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #C5D9E8;
+    background: #F9FCFF;
+    box-sizing: border-box;
+}
+
+textarea {
+    min-height: 90px;
+}
+
+.materials-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin-top: 15px;
+}
+
+.materials-table th {
+    background: #0A3D62;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.materials-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.materials-table input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+.btn-add {
+    margin-top: 20px;
+    background: #1B7FC2;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.total-box {
+    background: #D8ECFF;
+    padding: 18px;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 25px;
+    text-align: right;
+}
+
+.submit-btn {
+    margin-top: 35px;
+    width: 100%;
+    padding: 17px;
+    background: #0A3D62;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.success-box {
+    margin-top: 25px;
+    display: none;
+    background: #D4EDDA;
+    color: #155724;
+    border: 1px solid #A3D4A5;
+    padding: 18px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.error-box {
+    margin-top: 15px;
+    display: none;
+    background: #F8D7DA;
+    color: #721c24;
+    border: 1px solid #F5C6CB;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.image-preview-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.image-item {
+    position: relative;
+    width: 130px;
+    height: 130px;
+}
+
+.image-item img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.remove-img {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #D9534F;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.small-muted {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 6px;
+}
 </style>
 </head>
 
@@ -45,12 +221,10 @@ textarea { min-height: 90px; }
 </div>
 
 <div class="container">
-
     <div id="successBox" class="success-box">✔ Formulário enviado com sucesso!</div>
     <div id="errorBox" class="error-box"></div>
 
     <form id="formulario" onsubmit="return false;">
-
         <div class="section-title">Dados do Técnico</div>
 
         <label>Nome do Técnico *</label>
@@ -122,30 +296,26 @@ textarea { min-height: 90px; }
         <label>Comprovante de Recebimento (Imagens Ilimitadas)</label>
         <input type="file" id="comprovantes" accept="image/*" multiple>
         <div class="small-muted">Selecione quantas imagens quiser. O upload pode demorar dependendo do tamanho.</div>
-
         <div id="preview" class="image-preview-box"></div>
 
         <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
-
     </form>
 </div>
 
 <script>
-/* ---------------- SUPABASE CONFIG ---------------- */
 const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi6InFkZXBmc2d1ZWJrZmV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
-
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
 const BUCKET_NAME = "descontos";
 
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* --------------- MAIN SCRIPT ---------------- */
 document.addEventListener('DOMContentLoaded', function () {
     const btnAdd = document.getElementById('btnAddMaterial');
     const btnEnviar = document.getElementById('btnEnviar');
     const comprovantesInput = document.getElementById('comprovantes');
     const successBox = document.getElementById('successBox');
     const errorBox = document.getElementById('errorBox');
+
     let imagensSelecionadas = [];
 
     addMaterialRow();
@@ -161,28 +331,31 @@ document.addEventListener('DOMContentLoaded', function () {
             <td><span class="subtotal">0.00</span></td>
             <td><button type="button" class="remove-line-btn">Remover</button></td>
         `;
-        row.querySelector('.remove-line-btn').addEventListener('click', () => { row.remove(); calcularTotal(); });
+        row.querySelector('.remove-line-btn').addEventListener('click', function () {
+            row.remove();
+            calcularTotal();
+        });
     }
 
     window.calcularTotal = function () {
         let total = 0;
         document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
-            if (i===0) return;
-            const qtd = parseFloat(linha.querySelector(".qtd")?.value||0);
-            const valor = parseFloat(linha.querySelector(".valor")?.value||0);
-            const subtotal = (isFinite(qtd)&&isFinite(valor)) ? qtd*valor : 0;
+            if (i === 0) return;
+            const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
+            const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
+            const subtotal = (isFinite(qtd) && isFinite(valor)) ? qtd * valor : 0;
             linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
             total += subtotal;
         });
         document.getElementById("totalValue").innerText = total.toFixed(2);
     };
 
-    comprovantesInput.addEventListener('change', function() {
+    comprovantesInput.addEventListener('change', function () {
         const arquivos = Array.from(this.files || []);
         arquivos.forEach(arq => {
-            if(!arq.type.startsWith('image/')) return;
+            if (!arq.type.startsWith('image/')) return;
             const leitor = new FileReader();
-            leitor.onload = ev => {
+            leitor.onload = function (ev) {
                 imagensSelecionadas.push({ file: arq, preview: ev.target.result });
                 atualizarPreview();
             };
@@ -197,20 +370,27 @@ document.addEventListener('DOMContentLoaded', function () {
         imagensSelecionadas.forEach((img, index) => {
             const div = document.createElement('div');
             div.className = 'image-item';
-            div.innerHTML = `<img src="${img.preview}"><button class="remove-img" type="button" onclick="removerImagem(${index})">X</button>`;
+            div.innerHTML = `
+                <img src="${img.preview}" alt="Comprovante ${index+1}">
+                <button class="remove-img" type="button" onclick="removerImagem(${index})">X</button>
+            `;
             preview.appendChild(div);
         });
     }
-    window.removerImagem = index => { imagensSelecionadas.splice(index,1); atualizarPreview(); };
+
+    window.removerImagem = function (index) {
+        imagensSelecionadas.splice(index, 1);
+        atualizarPreview();
+    };
 
     btnEnviar.addEventListener('click', enviarFormulario);
 
     async function enviarFormulario() {
-        successBox.style.display='none';
-        errorBox.style.display='none';
-        errorBox.innerText='';
+        successBox.style.display = 'none';
+        errorBox.style.display = 'none';
+        errorBox.innerText = '';
         btnEnviar.disabled = true;
-        btnEnviar.innerText='Enviando...';
+        btnEnviar.innerText = 'Enviando...';
 
         try {
             const tec_nome = document.getElementById("tec_nome").value.trim();
@@ -222,67 +402,84 @@ document.addEventListener('DOMContentLoaded', function () {
             const responsavel = document.getElementById("resp").value.trim();
             const justificativa = document.getElementById("just").value.trim();
 
-            if(!tec_nome || !uf || !data_desc || !motivo || !vivo || !rh) throw new Error("Preencha todos os campos obrigatórios (marcados com *).");
-
-            // materiais
-            const materiais = [];
-            document.querySelectorAll("#materialsTable tr").forEach((linha,i)=>{
-                if(i===0) return;
-                const desc = linha.querySelector(".desc")?.value?.trim()||'';
-                const qtd = parseFloat(linha.querySelector(".qtd")?.value||0);
-                const valor = parseFloat(linha.querySelector(".valor")?.value||0);
-                const subtotal = (isFinite(qtd)&&isFinite(valor)) ? qtd*valor:0;
-                if(desc) materiais.push({ descricao: desc, quantidade: qtd, valor_unitario: valor, subtotal });
-            });
-            const valor_total = materiais.reduce((acc,m)=>acc+(m.subtotal||0),0);
-
-            // upload PDF
-            const pdfFile = document.getElementById("pdf").files[0];
-            let pdf_url = null;
-            if(pdfFile){
-                const safeName = `pdfs/pdf_${Date.now()}_${encodeURIComponent(pdfFile.name)}`;
-                const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(safeName, pdfFile,{cacheControl:'3600', upsert:false});
-                if(!error) pdf_url = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName).data.publicUrl;
+            if (!tec_nome || !uf || !data_desc || !motivo || !vivo || !rh) {
+                throw new Error("Preencha todos os campos obrigatórios (marcados com *).");
             }
 
-            // upload imagens
-            const imagens_url = [];
-            for(const img of imagensSelecionadas){
+            const materiais = [];
+            document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
+                if (i === 0) return;
+                const desc = linha.querySelector(".desc")?.value?.trim() || '';
+                const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
+                const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
+                const subtotal = (isFinite(qtd) && isFinite(valor)) ? qtd * valor : 0;
+                if (desc) materiais.push({ descricao: desc, quantidade: qtd, valor_unitario: valor, subtotal });
+            });
+
+            const valor_total = materiais.reduce((acc, m) => acc + (m.subtotal || 0), 0);
+
+            // UPLOAD PDF
+            const pdfFile = document.getElementById("pdf").files[0];
+            let pdf_url = null;
+            if (pdfFile) {
+                const safeName = `pdfs/pdf_${Date.now()}_${encodeURIComponent(pdfFile.name)}`;
+                const { error: uploadError } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .upload(safeName, pdfFile, { cacheControl: '3600', upsert: false });
+                if (!uploadError) {
+                    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
+                    pdf_url = urlData?.publicUrl || null;
+                }
+            }
+
+            // UPLOAD IMAGENS
+            let imagens_url = [];
+            for (const img of imagensSelecionadas) {
                 const safeName = `imagens/${Date.now()}_${encodeURIComponent(img.file.name)}`;
-                const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(safeName,img.file,{cacheControl:'3600', upsert:false});
-                if(!error) imagens_url.push(supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName).data.publicUrl);
+                const { error: err } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .upload(safeName, img.file, { cacheControl: '3600', upsert: false });
+                if (!err) {
+                    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
+                    imagens_url.push(urlData?.publicUrl || null);
+                }
             }
 
             const payload = { tec_nome, uf, data_desc, motivo, vivo, rh, materiais, valor_total, responsavel, justificativa, pdf_url, imagens_url, created_at: new Date().toISOString() };
-            const { error } = await supabase.from("descontos").insert([payload]);
-            if(error) throw error;
+            const { error: insertError } = await supabase.from("descontos").insert([payload]);
+            if (insertError) throw new Error("Erro ao salvar no banco. Veja console para detalhes.");
 
-            successBox.style.display='block';
-            window.scrollTo({top:0, behavior:"smooth"});
-
+            successBox.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: "smooth" });
             document.getElementById("formulario").reset();
-            imagensSelecionadas=[];
+            imagensSelecionadas = [];
             atualizarPreview();
-            document.getElementById("materialsTable").innerHTML = `<tr><th>Descrição</th><th>Qtd.</th><th>Valor Unitário (R$)</th><th>Subtotal</th><th>Ação</th></tr>`;
+            document.getElementById("materialsTable").innerHTML = `
+                <tr>
+                    <th>Descrição</th>
+                    <th>Qtd.</th>
+                    <th>Valor Unitário (R$)</th>
+                    <th>Subtotal</th>
+                    <th>Ação</th>
+                </tr>`;
             addMaterialRow();
             calcularTotal();
-            setTimeout(()=>successBox.style.display='none',4000);
+            setTimeout(() => successBox.style.display = 'none', 4000);
 
-        } catch(err){
-            console.error(err);
-            errorBox.style.display='block';
+        } catch (err) {
+            errorBox.style.display = 'block';
             errorBox.innerText = err.message || 'Erro inesperado ao enviar o formulário.';
-            window.scrollTo({top:0, behavior:"smooth"});
-        } finally{
-            btnEnviar.disabled=false;
-            btnEnviar.innerText='Enviar Formulário';
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } finally {
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = 'Enviar Formulário';
         }
     }
 });
 </script>
-
 </body>
 </html>
+
 
 
 
