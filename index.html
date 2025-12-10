@@ -226,37 +226,14 @@ textarea {
             <option value="furto">Furto</option>
         </select>
 
-        <div class="section-title">Informações do Desconto</div>
-
-        <label>Descontado pela Vivo?</label>
-        <select id="vivo">
-            <option value="">Selecione...</option>
-            <option value="sim">Sim</option>
-            <option value="nao">Não</option>
-        </select>
-
-        <label>Desconto enviado para o RH?</label>
-        <select id="rh">
-            <option value="">Selecione...</option>
-            <option value="sim">Sim</option>
-            <option value="nao">Não</option>
-        </select>
-
-        <label>Assinatura do Técnico</label>
-        <select id="assinatura">
-            <option value="">Selecione...</option>
-            <option value="sim">Sim</option>
-            <option value="nao">Não</option>
-            <option value="testemunha">Testemunha</option>
-        </select>
-
         <div class="section-title">Materiais / Ferramental / Serializados</div>
 
         <table class="materials-table" id="materialsTable">
             <tr>
                 <th>Descrição</th>
                 <th>Qtd.</th>
-                <th>Valor (R$)</th>
+                <th>Valor Unitário (R$)</th>
+                <th>Subtotal</th>
                 <th>Ação</th>
             </tr>
         </table>
@@ -306,43 +283,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let imagensSelecionadas = [];
 
-    /* ---------- ADICIONAR LINHA ---------- */
+    /* ----------------- ADICIONAR LINHA ------------------ */
     btnAdd.addEventListener('click', function () {
         const table = document.getElementById("materialsTable");
         const row = table.insertRow();
+
         row.innerHTML = `
             <td><input type="text" class="desc"></td>
-            <td><input type="number" class="qtd" min="1" value="1" oninput="calcularTotal()"></td>
+
+            <td><input type="number" class="qtd" min="1" placeholder="" oninput="calcularTotal()"></td>
+
             <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
+
+            <td><span class="subtotal">0.00</span></td>
+
             <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
         `;
     });
 
-    /* ---------- REMOVER LINHA ---------- */
+    /* ----------------- REMOVER LINHA ------------------ */
     window.removerLinha = function (btn) {
         btn.parentNode.parentNode.remove();
         calcularTotal();
     };
 
-    /* ---------- CALCULAR TOTAL ---------- */
+    /* ----------------- CALCULAR TOTAL ------------------ */
     window.calcularTotal = function () {
         let total = 0;
 
         document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
             if (i === 0) return;
 
-            const qtd = linha.querySelector(".qtd")?.value;
-            const valor = linha.querySelector(".valor")?.value;
+            const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
+            const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
 
-            if (qtd && valor) {
-                total += (parseFloat(qtd) * parseFloat(valor));
-            }
+            const subtotal = qtd * valor;
+            linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+
+            total += subtotal;
         });
 
         document.getElementById("totalValue").innerText = total.toFixed(2);
     };
 
-    /* ---------- PREVIEW IMAGENS ---------- */
+    /* ---------- PREVIEW DAS IMAGENS ---------- */
     comprovantesInput.addEventListener('change', function () {
         const arquivos = Array.from(this.files);
 
@@ -394,7 +378,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const responsavel = document.getElementById("resp").value;
             const justificativa = document.getElementById("just").value;
 
-            /* -------- CAMPOS OBRIGATÓRIOS -------- */
             if (!tec_nome || !uf || !data_desc || !motivo) {
                 alert("Preencha todos os campos obrigatórios.");
                 return;
@@ -406,19 +389,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (i === 0) return;
 
                 const desc = linha.querySelector(".desc")?.value;
-                const qtd = linha.querySelector(".qtd")?.value;
-                const valor = linha.querySelector(".valor")?.value;
+                const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
+                const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
+                const subtotal = qtd * valor;
 
-                if (desc && qtd && valor) {
+                if (desc && qtd > 0 && valor > 0) {
                     materiais.push({
                         descricao: desc,
-                        qtd: parseInt(qtd),
-                        valor: parseFloat(valor)
+                        quantidade: qtd,
+                        valor_unitario: valor,
+                        subtotal: subtotal
                     });
                 }
             });
 
-            const valor_total = materiais.reduce((acc, m) => acc + (m.qtd * m.valor), 0);
+            const valor_total = materiais.reduce((acc, m) => acc + m.subtotal, 0);
 
             /* -------- UPLOAD PDF -------- */
             const pdfFile = document.getElementById("pdf").files[0];
@@ -431,8 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .upload(pdfPath, pdfFile);
 
                 if (!error) {
-                    pdf_url =
-                        supabase.storage.from("descontos").getPublicUrl(pdfPath).data.publicUrl;
+                    pdf_url = supabase.storage.from("descontos").getPublicUrl(pdfPath).data.publicUrl;
                 }
             }
 
@@ -446,8 +430,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .upload(filePath, img.file);
 
                 if (!error) {
-                    const url =
-                        supabase.storage.from("descontos").getPublicUrl(filePath).data.publicUrl;
+                    const url = supabase.storage.from("descontos").getPublicUrl(filePath).data.publicUrl;
                     imagens_url.push(url);
                 }
             }
@@ -481,7 +464,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById("successBox").style.display = "block";
             window.scrollTo({ top: 0, behavior: "smooth" });
 
-            /* -------- LIMPAR FORMULÁRIO -------- */
             document.getElementById("formulario").reset();
             imagensSelecionadas = [];
             atualizarPreview();
@@ -490,7 +472,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 <tr>
                     <th>Descrição</th>
                     <th>Qtd.</th>
-                    <th>Valor (R$)</th>
+                    <th>Valor Unitário (R$)</th>
+                    <th>Subtotal</th>
                     <th>Ação</th>
                 </tr>
             `;
@@ -512,6 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
 
 
 
