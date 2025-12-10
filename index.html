@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (pdfFile) {
                 const safeName = `pdfs/pdf_${Date.now()}_${encodeURIComponent(pdfFile.name)}`;
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from(BUCKET_NAME)
+                    .from(descontos)
                     .upload(safeName, pdfFile, { cacheControl: '3600', upsert: false });
 
                 if (uploadError) {
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     errorBox.style.display = 'block';
                     errorBox.innerText += 'Aviso: erro ao enviar o PDF. ';
                 } else {
-                    const { data: urlData, error: urlError } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
+                    const { data: urlData, error: urlError } = supabase.storage.from(descontos).getPublicUrl(safeName);
                     if (!urlError && urlData?.publicUrl) pdf_url = urlData.publicUrl;
                 }
             }
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     try {
                         const safeName = `imagens/${Date.now()}_${encodeURIComponent(img.file.name)}`;
                         const { data: up, error: err } = await supabase.storage
-                            .from(BUCKET_NAME)
+                            .from(descontos)
                             .upload(safeName, img.file, { cacheControl: '3600', upsert: false });
 
                         if (err) {
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             continue;
                         }
 
-                        const { data: urlData, error: urlError } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
+                        const { data: urlData, error: urlError } = supabase.storage.from(descontos).getPublicUrl(safeName);
                         if (!urlError && urlData?.publicUrl) imagens_url.push(urlData.publicUrl);
                     } catch (e) {
                         console.warn("Erro no upload de uma imagem:", e);
@@ -584,6 +584,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
 
 
 
