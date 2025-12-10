@@ -83,6 +83,7 @@ input, select, textarea {
     border-radius: 8px;
     border: 1px solid #C5D9E8;
     background: #F9FCFF;
+    box-sizing: border-box;
 }
 
 textarea {
@@ -100,11 +101,19 @@ textarea {
     background: #0A3D62;
     color: white;
     padding: 12px;
+    text-align: left;
 }
 
 .materials-table td {
     border: 1px solid #ddd;
     padding: 10px;
+    vertical-align: middle;
+}
+
+.materials-table input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
 }
 
 .btn-add {
@@ -153,6 +162,16 @@ textarea {
     text-align: center;
 }
 
+.error-box {
+    margin-top: 15px;
+    display: none;
+    background: #F8D7DA;
+    color: #721c24;
+    border: 1px solid #F5C6CB;
+    padding: 12px;
+    border-radius: 8px;
+}
+
 .image-preview-box {
     display: flex;
     flex-wrap: wrap;
@@ -185,6 +204,12 @@ textarea {
     height: 26px;
     cursor: pointer;
 }
+
+.small-muted {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 6px;
+}
 </style>
 </head>
 
@@ -198,41 +223,40 @@ textarea {
 <div class="container">
 
     <div id="successBox" class="success-box">✔ Formulário enviado com sucesso!</div>
+    <div id="errorBox" class="error-box"></div>
 
-    <form id="formulario">
+    <form id="formulario" onsubmit="return false;">
 
         <div class="section-title">Dados do Técnico</div>
 
-        <label>Nome do Técnico</label>
-        <input type="text" id="tec_nome">
+        <label>Nome do Técnico *</label>
+        <input type="text" id="tec_nome" autocomplete="off">
 
-        <label>UF</label>
+        <label>UF *</label>
         <select id="uf">
             <option value="">Selecione...</option>
             <option value="RJ">RJ</option>
             <option value="ES">ES</option>
         </select>
 
-        <label>Data do Desconto</label>
+        <label>Data do Desconto *</label>
         <input type="date" id="data_desc">
 
-        <!-- NOVO CAMPO 1 -->
-        <label>Descontado pela Vivo?</label>   <!-- ADICIONADO -->
-        <select id="vivo">                    <!-- ADICIONADO -->
+        <label>Descontado pela Vivo? *</label>
+        <select id="vivo">
             <option value="">Selecione...</option>
             <option value="sim">Sim</option>
             <option value="não">Não</option>
         </select>
 
-        <!-- NOVO CAMPO 2 -->
-        <label>Desconto RH?</label>           <!-- ADICIONADO -->
-        <select id="rh">                     <!-- ADICIONADO -->
+        <label>Desconto RH? *</label>
+        <select id="rh">
             <option value="">Selecione...</option>
             <option value="sim">Sim</option>
             <option value="não">Não</option>
         </select>
 
-        <label>Motivo do Desconto</label>
+        <label>Motivo do Desconto *</label>
         <select id="motivoSelect">
             <option value="">Selecione...</option>
             <option value="nada consta">Nada Consta</option>
@@ -273,6 +297,7 @@ textarea {
 
         <label>Comprovante de Recebimento (Imagens Ilimitadas)</label>
         <input type="file" id="comprovantes" accept="image/*" multiple>
+        <div class="small-muted">Selecione quantas imagens quiser. O upload pode demorar dependendo do tamanho.</div>
 
         <div id="preview" class="image-preview-box"></div>
 
@@ -288,6 +313,8 @@ textarea {
 const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
 
+const BUCKET_NAME = "descontos"; // ajuste se necessário
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ----------------- SCRIPT PRINCIPAL ----------------- */
@@ -296,32 +323,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnAdd = document.getElementById('btnAddMaterial');
     const btnEnviar = document.getElementById('btnEnviar');
     const comprovantesInput = document.getElementById('comprovantes');
+    const successBox = document.getElementById('successBox');
+    const errorBox = document.getElementById('errorBox');
 
     let imagensSelecionadas = [];
 
+    // Adiciona uma linha de material ao carregar para facilitar
+    addMaterialRow();
+
     /* ----------------- ADICIONAR LINHA ------------------ */
-    btnAdd.addEventListener('click', function () {
+    btnAdd.addEventListener('click', addMaterialRow);
+
+    function addMaterialRow() {
         const table = document.getElementById("materialsTable");
         const row = table.insertRow();
-
         row.innerHTML = `
-            <td><input type="text" class="desc"></td>
-
-            <td><input type="number" class="qtd" min="1" placeholder="" oninput="calcularTotal()"></td>
-
-            <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
-
+            <td><input type="text" class="desc" placeholder="Descrição do item"></td>
+            <td><input type="number" class="qtd" min="1" placeholder="1" value="1" oninput="calcularTotal()"></td>
+            <td><input type="number" class="valor" step="0.01" placeholder="0.00" value="0.00" oninput="calcularTotal()"></td>
             <td><span class="subtotal">0.00</span></td>
-
-            <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
+            <td><button type="button" class="remove-line-btn">Remover</button></td>
         `;
-    });
 
-    /* ----------------- REMOVER LINHA ------------------ */
-    window.removerLinha = function (btn) {
-        btn.parentNode.parentNode.remove();
-        calcularTotal();
-    };
+        // associar evento ao botão remover da nova linha
+        row.querySelector('.remove-line-btn').addEventListener('click', function () {
+            row.remove();
+            calcularTotal();
+        });
+    }
 
     /* ----------------- CALCULAR TOTAL ------------------ */
     window.calcularTotal = function () {
@@ -330,11 +359,15 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
             if (i === 0) return;
 
-            const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
-            const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
+            const qtdInput = linha.querySelector(".qtd");
+            const valorInput = linha.querySelector(".valor");
 
-            const subtotal = qtd * valor;
-            linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+            const qtd = parseFloat(qtdInput?.value || 0);
+            const valor = parseFloat(valorInput?.value || 0);
+
+            const subtotal = (isFinite(qtd) && isFinite(valor)) ? qtd * valor : 0;
+            const subtotalSpan = linha.querySelector(".subtotal");
+            if (subtotalSpan) subtotalSpan.innerText = subtotal.toFixed(2);
 
             total += subtotal;
         });
@@ -344,9 +377,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ---------- PREVIEW DAS IMAGENS ---------- */
     comprovantesInput.addEventListener('change', function () {
-        const arquivos = Array.from(this.files);
+        const arquivos = Array.from(this.files || []);
 
         arquivos.forEach(arq => {
+            // limitar tipo
+            if (!arq.type.startsWith('image/')) return;
+
             const leitor = new FileReader();
             leitor.onload = function (ev) {
                 imagensSelecionadas.push({ file: arq, preview: ev.target.result });
@@ -354,6 +390,9 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             leitor.readAsDataURL(arq);
         });
+
+        // limpar input para permitir re-upload do mesmo arquivo se necessário
+        this.value = '';
     });
 
     function atualizarPreview() {
@@ -365,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function () {
             div.className = 'image-item';
 
             div.innerHTML = `
-                <img src="${img.preview}">
+                <img src="${img.preview}" alt="Comprovante ${index+1}">
                 <button class="remove-img" type="button" onclick="removerImagem(${index})">X</button>
             `;
 
@@ -382,107 +421,137 @@ document.addEventListener('DOMContentLoaded', function () {
     btnEnviar.addEventListener('click', enviarFormulario);
 
     async function enviarFormulario() {
-        try {
-            /* -------- CAMPOS NOVOS ADICIONADOS -------- */
-            const vivo = document.getElementById("vivo").value;   // 🔵 ADICIONADO
-            const rh = document.getElementById("rh").value;       // 🔵 ADICIONADO
+        // limpeza de mensagens
+        successBox.style.display = 'none';
+        errorBox.style.display = 'none';
+        errorBox.innerText = '';
 
-            const tec_nome = document.getElementById("tec_nome").value;
-            const uf = document.getElementById("uf").value;
+        // bloquear botão
+        btnEnviar.disabled = true;
+        btnEnviar.innerText = 'Enviando...';
+
+        try {
+            const vivo = document.getElementById("vivo").value.trim();
+            const rh = document.getElementById("rh").value.trim();
+
+            const tec_nome = document.getElementById("tec_nome").value.trim();
+            const uf = document.getElementById("uf").value.trim();
             const data_desc = document.getElementById("data_desc").value;
             const motivo = document.getElementById("motivoSelect").value;
-            const responsavel = document.getElementById("resp").value;
-            const justificativa = document.getElementById("just").value;
+            const responsavel = document.getElementById("resp").value.trim();
+            const justificativa = document.getElementById("just").value.trim();
 
+            // validações simples
             if (!tec_nome || !uf || !data_desc || !motivo || !vivo || !rh) {
-                alert("Preencha todos os campos obrigatórios.");
-                return;
+                throw new Error("Preencha todos os campos obrigatórios (marcados com *).");
             }
 
-            /* -------- CAPTURAR MATERIAIS -------- */
+            // capturar materiais
             const materiais = [];
             document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
                 if (i === 0) return;
 
-                const desc = linha.querySelector(".desc")?.value;
+                const desc = linha.querySelector(".desc")?.value?.trim() || '';
                 const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
                 const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
-                const subtotal = qtd * valor;
+                const subtotal = (isFinite(qtd) && isFinite(valor)) ? qtd * valor : 0;
 
-                if (desc && qtd > 0 && valor > 0) {
+                // aceitar linha mesmo com valor zero? aqui só adiciona se houver descrição
+                if (desc) {
                     materiais.push({
                         descricao: desc,
-                        quantidade: qtd,
-                        valor_unitario: valor,
+                        quantidade: isFinite(qtd) ? qtd : 0,
+                        valor_unitario: isFinite(valor) ? valor : 0,
                         subtotal: subtotal
                     });
                 }
             });
 
-            const valor_total = materiais.reduce((acc, m) => acc + m.subtotal, 0);
+            const valor_total = materiais.reduce((acc, m) => acc + (m.subtotal || 0), 0);
 
-            /* -------- UPLOAD PDF -------- */
+            // UPLOAD PDF (se existir)
             const pdfFile = document.getElementById("pdf").files[0];
             let pdf_url = null;
 
             if (pdfFile) {
-                const pdfPath = `pdfs/pdf_${Date.now()}.pdf`;
-                const { error } = await supabase.storage
-                    .from("descontos")
-                    .upload(pdfPath, pdfFile);
+                const safeName = `pdfs/pdf_${Date.now()}_${encodeURIComponent(pdfFile.name)}`;
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .upload(safeName, pdfFile, { cacheControl: '3600', upsert: false });
 
-                if (!error) {
-                    pdf_url = supabase.storage.from("descontos").getPublicUrl(pdfPath).data.publicUrl;
+                if (uploadError) {
+                    console.warn("Erro upload PDF:", uploadError);
+                    // não aborta; registra mensagem e continua
+                    errorBox.style.display = 'block';
+                    errorBox.innerText += 'Aviso: erro ao enviar o PDF. ';
+                } else {
+                    const { data: urlData, error: urlError } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
+                    if (!urlError && urlData?.publicUrl) pdf_url = urlData.publicUrl;
                 }
             }
 
-            /* -------- UPLOAD IMAGENS -------- */
+            // UPLOAD IMAGENS
             let imagens_url = [];
+            if (imagensSelecionadas.length > 0) {
+                for (const img of imagensSelecionadas) {
+                    try {
+                        const safeName = `imagens/${Date.now()}_${encodeURIComponent(img.file.name)}`;
+                        const { data: up, error: err } = await supabase.storage
+                            .from(BUCKET_NAME)
+                            .upload(safeName, img.file, { cacheControl: '3600', upsert: false });
 
-            for (const img of imagensSelecionadas) {
-                const filePath = `imagens/${Date.now()}_${img.file.name}`;
-                const { error } = await supabase.storage
-                    .from("descontos")
-                    .upload(filePath, img.file);
+                        if (err) {
+                            console.warn("Erro upload imagem:", err);
+                            // continuar com as próximas imagens
+                            errorBox.style.display = 'block';
+                            errorBox.innerText += `Aviso: falha ao enviar imagem ${img.file.name}. `;
+                            continue;
+                        }
 
-                if (!error) {
-                    const url = supabase.storage.from("descontos").getPublicUrl(filePath).data.publicUrl;
-                    imagens_url.push(url);
+                        const { data: urlData, error: urlError } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
+                        if (!urlError && urlData?.publicUrl) imagens_url.push(urlData.publicUrl);
+                    } catch (e) {
+                        console.warn("Erro no upload de uma imagem:", e);
+                    }
                 }
             }
 
-            /* -------- SALVAR NO BANCO -------- */
-            const { error: insertError } = await supabase
+            // Inserir no banco
+            const payload = {
+                tec_nome,
+                uf,
+                data_desc, // formato YYYY-MM-DD (input date)
+                motivo,
+                vivo,
+                rh,
+                materiais,
+                valor_total,
+                responsavel,
+                justificativa,
+                pdf_url,
+                imagens_url,
+                created_at: new Date().toISOString()
+            };
+
+            const { data: insertData, error: insertError } = await supabase
                 .from("descontos")
-                .insert({
-                    tec_nome,
-                    uf,
-                    data_desc,
-                    motivo,
-                    vivo,      // 🔵 ADICIONADO
-                    rh,        // 🔵 ADICIONADO
-                    materiais,
-                    valor_total,
-                    responsavel,
-                    justificativa,
-                    pdf_url,
-                    imagens_url
-                });
+                .insert([payload]);
 
             if (insertError) {
-                console.error(insertError);
-                alert("Erro ao salvar no banco.");
-                return;
+                console.error("Erro insert:", insertError);
+                throw new Error("Erro ao salvar no banco. Veja console para detalhes.");
             }
 
-            /* -------- SUCESSO -------- */
-            document.getElementById("successBox").style.display = "block";
+            // Sucesso
+            successBox.style.display = 'block';
             window.scrollTo({ top: 0, behavior: "smooth" });
 
+            // resetar formulário
             document.getElementById("formulario").reset();
             imagensSelecionadas = [];
             atualizarPreview();
 
+            // reset tabela materiais (apenas cabeçalho)
             document.getElementById("materialsTable").innerHTML = `
                 <tr>
                     <th>Descrição</th>
@@ -492,16 +561,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     <th>Ação</th>
                 </tr>
             `;
+            // adicionar uma linha vazia como conveniência
+            addMaterialRow();
+            calcularTotal();
 
-            document.getElementById("totalValue").innerText = "0.00";
-
-            setTimeout(() => {
-                document.getElementById("successBox").style.display = "none";
-            }, 4000);
+            // esconder sucesso após 4s
+            setTimeout(() => successBox.style.display = 'none', 4000);
 
         } catch (err) {
             console.error(err);
-            alert("Erro inesperado ao enviar o formulário.");
+            errorBox.style.display = 'block';
+            errorBox.innerText = err.message || 'Erro inesperado ao enviar o formulário.';
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } finally {
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = 'Enviar Formulário';
         }
     }
 
@@ -510,6 +584,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
+
 
 
 
