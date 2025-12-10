@@ -403,24 +403,22 @@ document.addEventListener('DOMContentLoaded', function () {
             
             /* -------- SALVAR NO BANCO -------- */
             const { error: insertError } = await supabase
-                .from("descontos")
-                .insert({
-                    tec_nome,
-                    uf,
-                    data_desc,
-                    motivo,
-                    vivo,
-                    rh,
-                    assinatura,
-                    materiais,
-                    valor_total,
-                    responsavel,
-                    justificativa,
-                    pdf_url,
-                    // imagens_url (antigo campo para array de imagens) foi substituído por:
-                    comprovante_url // Novo campo para o URL do PDF de comprovante
-                });
-
+    .from("descontos")
+    .insert({
+        tec_nome,
+        uf,
+        data_desc,
+        motivo,
+        vivo,
+        rh,
+        assinatura,
+        materiais,
+        valor_total,
+        responsavel,
+        justificativa,
+        pdf_url,
+        imagens_url: comprovante_url ? [comprovante_url] : [] // <-- AGORA SIM
+    });
             if (insertError) {
                 console.error(insertError);
                 alert("Erro ao salvar no banco.");
@@ -460,6 +458,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
 
 
 
