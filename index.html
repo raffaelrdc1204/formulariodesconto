@@ -1,438 +1,206 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-<meta charset="UTF-8">
-<title>Formulário Controle de Desconto RJ x ES</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Formulário Controle de Desconto RJ x ES</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-@font-face {
-    font-family: 'Aptos Display';
-    src: local('Aptos Display'), local('AptosDisplay');
-}
+    <style>
+        @font-face {
+            font-family: 'Aptos Display';
+            src: local('Aptos Display'), local('AptosDisplay');
+        }
 
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #F5F7FA;
-    margin: 0;
-    padding: 0;
-}
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #F5F7FA;
+            margin: 0;
+            padding: 0;
+        }
 
-.header {
-    width: 100%;
-    padding: 40px 20px;
-    background: #0A3D62;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
+        .header {
+            width: 100%;
+            padding: 40px 20px;
+            background: #0A3D62;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
 
-.header img {
-    height: 105px;
-    position: absolute;
-    left: 25px;
-    top: 50%;
-    transform: translateY(-50%);
-}
+        .header img {
+            height: 105px;
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
 
-.header-title {
-    font-family: 'Aptos Display';
-    font-size: 34px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
+        .header-title {
+            font-family: 'Aptos Display';
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
 
-.container {
-    max-width: 960px;
-    background: #FFFFFF;
-    margin: 40px auto;
-    padding: 35px;
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.1);
-}
+        .container {
+            max-width: 960px;
+            background: #FFFFFF;
+            margin: 40px auto;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+        }
 
-.section-title {
-    font-size: 20px;
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #0A3D62;
-    border-left: 5px solid #1B7FC2;
-    padding-left: 10px;
-}
+        .section-title {
+            font-size: 20px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #0A3D62;
+            border-left: 5px solid #1B7FC2;
+            padding-left: 10px;
+        }
 
-label {
-    display: block;
-    margin: 10px 0 6px;
-    font-weight: 600;
-    color: #0A3D62;
-}
+        label {
+            display: block;
+            margin: 10px 0 6px;
+            font-weight: 600;
+            color: #0A3D62;
+        }
 
-input, select, textarea {
-    width: 100%;
-    padding: 13px;
-    font-size: 15px;
-    border-radius: 8px;
-    border: 1px solid #C5D9E8;
-    background: #F9FCFF;
-}
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #C5D9E8;
+            background: #F9FCFF;
+        }
 
-textarea {
-    min-height: 90px;
-}
+        textarea {
+            min-height: 90px;
+        }
 
-.materials-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    margin-top: 15px;
-}
+        .materials-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 15px;
+        }
 
-.materials-table th {
-    background: #0A3D62;
-    color: white;
-    padding: 12px;
-}
+        .materials-table th {
+            background: #0A3D62;
+            color: white;
+            padding: 12px;
+        }
 
-.materials-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-}
+        .materials-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
 
-.btn-add {
-    margin-top: 20px;
-    background: #1B7FC2;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-}
+        .btn-add {
+            margin-top: 20px;
+            background: #1B7FC2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
-.total-box {
-    background: #D8ECFF;
-    padding: 18px;
-    border-radius: 10px;
-    font-size: 22px;
-    font-weight: bold;
-    margin-top: 25px;
-    text-align: right;
-}
+        .total-box {
+            background: #D8ECFF;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 25px;
+            text-align: right;
+        }
 
-.submit-btn {
-    margin-top: 35px;
-    width: 100%;
-    padding: 17px;
-    background: #0A3D62;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-}
+        .submit-btn {
+            margin-top: 35px;
+            width: 100%;
+            padding: 17px;
+            background: #0A3D62;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.success-box {
-    margin-top: 25px;
-    display: none;
-    background: #D4EDDA;
-    color: #155724;
-    border: 1px solid #A3D4A5;
-    padding: 18px;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-}
-
-/* Os estilos abaixo não terão efeito prático, mas são mantidos */
-.image-preview-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 10px;
-}
-
-.image-item {
-    position: relative;
-    width: 130px;
-    height: 130px;
-}
-
-.image-item img {
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
-.remove-img {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #D9534F;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    cursor: pointer;
-}
-</style>
+        .success-box {
+            margin-top: 25px;
+            display: none;
+            background: #D4EDDA;
+            color: #155724;
+            border: 1px solid #A3D4A5;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="header">
-    <img src="logohallen.png" alt="Logo Hallen">
-    <div class="header-title">Formulário Controle de Desconto RJ x ES</div>
-</div>
+    <div class="header">
+        <img src="logohallen.png" alt="Logo Hallen">
+        <div class="header-title">Formulário Controle de Desconto RJ x ES</div>
+    </div>
 
-<div class="container">
+    <div class="container">
 
-    <div id="successBox" class="success-box">✔ Formulário enviado com sucesso!</div>
-
-    <form id="formulario">
-
-        <div class="section-title">Dados do Técnico</div>
-
-        <label>Nome do Técnico</label>
-        <input type="text" id="tec_nome">
-
-        <label>UF</label>
-        <select id="uf">
-            <option value="">Selecione...</option>
-            <option value="RJ">RJ</option>
-            <option value="ES">ES</option>
-        </select>
-
-        <label>Data do Desconto</label>
-        <input type="date" id="data_desc">
-
-        <label>Motivo do Desconto</label>
-        <select id="motivoSelect">
-            <option value="">Selecione...</option>
-            <option value="nada consta">Nada Consta</option>
-            <option value="perda">Perda</option>
-            <option value="aging">Aging</option>
-            <option value="reversa">Reversa</option>
-            <option value="furto">Furto</option>
-        </select>
-
-        <div class="section-title">Materiais / Ferramental / Serializados</div>
-
-        <table class="materials-table" id="materialsTable">
-            <tr>
-                <th>Descrição</th>
-                <th>Qtd.</th>
-                <th>Valor Unitário (R$)</th>
-                <th>Subtotal</th>
-                <th>Ação</th>
-            </tr>
-        </table>
-
-        <button class="btn-add" type="button" id="btnAddMaterial">+ Adicionar Descrição</button>
-
-        <div class="total-box">
-            Valor Total: R$ <span id="totalValue">0.00</span>
+        <div id="successBox" class="success-box">
+            ✔ Formulário enviado com sucesso!
         </div>
 
-        <div class="section-title">Responsável e Evidências</div>
+        <form id="formulario">
 
-        <label>Responsável pelo Desconto</label>
-        <input type="text" id="resp">
+            <div class="section-title">Dados do Técnico</div>
 
-        <label>Justificativa</label>
-        <textarea id="just"></textarea>
+            <label>Nome do Técnico</label>
+            <input type="text" id="tec_nome">
 
-        <label>Carta de Desconto (PDF)</label>
-        <input type="file" id="pdf" accept="application/pdf">
+            <label>UF</label>
+            <select id="uf">
+                <option value="">Selecione...</option>
+                <option value="RJ">RJ</option>
+                <option value="ES">ES</option>
+            </select>
 
-        <label>Comprovante de Recebimento (PDF)</label>
-        <input type="file" id="comprovantes" accept="application/pdf">
+            <label>Data do Desconto</label>
+            <input type="date" id="data_desc">
 
-        <div id="preview" class="image-preview-box" style="display:none;"></div> 
+            <label>Motivo do Desconto</label>
+            <select id="motivoSelect">
+                <option value="">Selecione...</option>
+                <option value="nada consta">Nada Consta</option>
+                <option value="perda">Perda</option>
+                <option value="aging">Aging</option>
+                <option value="reversa">Reversa</option>
+                <option value="furto">Furto</option>
+            </select>
 
-        <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
+            <div class="section-title">Materiais / Ferramental / Serializados</div>
 
-    </form>
-</div>
-
-<script>
-/* --------------------------------------------------------
-   CONFIGURAÇÃO SUPABASE
--------------------------------------------------------- */
-const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxCckYBmxUPvdXHjNtso";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ----------------- SCRIPT PRINCIPAL ----------------- */
-document.addEventListener('DOMContentLoaded', function () {
-
-    const btnAdd = document.getElementById('btnAddMaterial');
-    const btnEnviar = document.getElementById('btnEnviar');
-    const comprovantesInput = document.getElementById('comprovantes'); // Agora um PDF
-
-    // Variável de imagensSelecionadas e lógica de preview removidas, pois não se aplicam a PDFs únicos
-
-    /* ----------------- ADICIONAR LINHA ------------------ */
-    btnAdd.addEventListener('click', function () {
-        const table = document.getElementById("materialsTable");
-        const row = table.insertRow();
-
-        row.innerHTML = `
-            <td><input type="text" class="desc"></td>
-            <td><input type="number" class="qtd" min="1" placeholder="" oninput="calcularTotal()"></td>
-            <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
-            <td><span class="subtotal">0.00</span></td>
-            <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
-        `;
-    });
-
-    /* ----------------- REMOVER LINHA ------------------ */
-    window.removerLinha = function (btn) {
-        btn.parentNode.parentNode.remove();
-        calcularTotal();
-    };
-
-    /* ----------------- CALCULAR TOTAL ------------------ */
-    window.calcularTotal = function () {
-        let total = 0;
-
-        document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
-            if (i === 0) return;
-
-            const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
-            const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
-
-            const subtotal = qtd * valor;
-            linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
-
-            total += subtotal;
-        });
-
-        document.getElementById("totalValue").innerText = total.toFixed(2);
-    };
-
-    /* ---------- PREVIEW DAS IMAGENS (REMOVIDO) ---------- */
-    // A lógica de comprovantesInput.addEventListener('change', ...) e as funções atualizarPreview/removerImagem foram removidas.
-
-    /* ---------- ENVIO DO FORMULÁRIO ---------- */
-    btnEnviar.addEventListener('click', enviarFormulario);
-
-    async function enviarFormulario() {
-        try {
-            /* -------- CAPTURAR CAMPOS -------- */
-            const tec_nome = document.getElementById("tec_nome").value;
-            const uf = document.getElementById("uf").value;
-            const data_desc = document.getElementById("data_desc").value;
-            const motivo = document.getElementById("motivoSelect").value;
-            
-            // Variáveis não presentes no HTML, definidas como null para evitar erro:
-            const vivo = document.getElementById("vivo") ? document.getElementById("vivo").value : null;
-            const rh = document.getElementById("rh") ? document.getElementById("rh").value : null;
-            const assinatura = document.getElementById("assinatura") ? document.getElementById("assinatura").value : null;
-            
-            const responsavel = document.getElementById("resp").value;
-            const justificativa = document.getElementById("just").value;
-
-            if (!tec_nome || !uf || !data_desc || !motivo) {
-                alert("Preencha todos os campos obrigatórios.");
-                return;
-            }
-
-            /* -------- CAPTURAR MATERIAIS -------- */
-            const materiais = [];
-            document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
-                if (i === 0) return;
-
-                const desc = linha.querySelector(".desc")?.value;
-                const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
-                const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
-                const subtotal = qtd * valor;
-
-                if (desc && qtd > 0 && valor > 0) {
-                    materiais.push({
-                        descricao: desc,
-                        quantidade: qtd,
-                        valor_unitario: valor,
-                        subtotal: subtotal
-                    });
-                }
-            });
-
-            const valor_total = materiais.reduce((acc, m) => acc + m.subtotal, 0);
-
-            /* -------- UPLOAD PDF (Carta de Desconto - mantido) -------- */
-            const pdfFile = document.getElementById("pdf").files[0];
-            let pdf_url = null;
-
-            if (pdfFile) {
-                const pdfPath = `pdfs/pdf_${Date.now()}.pdf`;
-                const { error } = await supabase.storage
-                    .from("descontos")
-                    .upload(pdfPath, pdfFile);
-
-                if (!error) {
-                    pdf_url = supabase.storage.from("descontos").getPublicUrl(pdfPath).data.publicUrl;
-                }
-            }
-
-            /* -------- UPLOAD COMPROVANTE (AGORA PDF) -------- */
-            const comprovanteFile = comprovantesInput.files[0];
-            let comprovante_url = null; 
-
-            if (comprovanteFile) {
-                const comprovantePath = `comprovantes/${Date.now()}_comprovante.pdf`;
-                const { error } = await supabase.storage
-                    .from("descontos")
-                    .upload(comprovantePath, comprovanteFile);
-
-                if (!error) {
-                    comprovante_url = supabase.storage.from("descontos").getPublicUrl(comprovantePath).data.publicUrl;
-                }
-            }
-            
-            /* -------- SALVAR NO BANCO -------- */
-            const { error: insertError } = await supabase
-    .from("descontos")
-    .insert({
-        tec_nome,
-        uf,
-        data_desc,
-        motivo,
-        vivo,
-        rh,
-        assinatura,
-        materiais,
-        valor_total,
-        responsavel,
-        justificativa,
-        pdf_url,
-        imagens_url: comprovante_url ? [comprovante_url] : [] // <-- AGORA SIM
-    });
-            if (insertError) {
-                console.error(insertError);
-                alert("Erro ao salvar no banco.");
-                return;
-            }
-
-            /* -------- SUCESSO -------- */
-            document.getElementById("successBox").style.display = "block";
-            window.scrollTo({ top: 0, behavior: "smooth" });
-
-            document.getElementById("formulario").reset();
-            // Lógica de reset de imagensSelecionadas e atualizarPreview foi removida/não é necessária.
-
-            document.getElementById("materialsTable").innerHTML = `
+            <table class="materials-table" id="materialsTable">
                 <tr>
                     <th>Descrição</th>
                     <th>Qtd.</th>
@@ -440,24 +208,223 @@ document.addEventListener('DOMContentLoaded', function () {
                     <th>Subtotal</th>
                     <th>Ação</th>
                 </tr>
-            `;
-            document.getElementById("totalValue").innerText = "0.00";
+            </table>
 
-            setTimeout(() => {
-                document.getElementById("successBox").style.display = "none";
-            }, 4000);
+            <button class="btn-add" type="button" id="btnAddMaterial">+ Adicionar Descrição</button>
 
-        } catch (err) {
-            console.error(err);
-            alert("Erro inesperado ao enviar o formulário.");
-        }
-    }
+            <div class="total-box">
+                Valor Total: R$ <span id="totalValue">0.00</span>
+            </div>
 
-});
-</script>
+            <div class="section-title">Responsável e Evidências</div>
 
+            <label>Responsável pelo Desconto</label>
+            <input type="text" id="resp">
+
+            <label>Justificativa</label>
+            <textarea id="just"></textarea>
+
+            <label>Carta de Desconto (PDF)</label>
+            <input type="file" id="pdf" accept="application/pdf">
+
+            <label>Comprovante de Recebimento (PDF)</label>
+            <input type="file" id="comprovantes" accept="application/pdf">
+
+            <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
+
+        </form>
+    </div>
+
+    <script>
+        /* --------------------------------------------------------
+            SUPABASE CONFIG
+        -------------------------------------------------------- */
+        const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxCckYBmxUPvdXHjNtso";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        /* --------------------------------------------------------
+            INICIAR
+        -------------------------------------------------------- */
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const btnAdd = document.getElementById("btnAddMaterial");
+            const btnEnviar = document.getElementById("btnEnviar");
+
+            /* ---------------- ADICIONAR LINHA ---------------- */
+            btnAdd.addEventListener("click", () => {
+                const table = document.getElementById("materialsTable");
+                const row = table.insertRow();
+
+                row.innerHTML = `
+                    <td><input type="text" class="desc"></td>
+                    <td><input type="number" class="qtd" min="1" oninput="calcularTotal()"></td>
+                    <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
+                    <td><span class="subtotal">0.00</span></td>
+                    <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
+                `;
+            });
+
+            /* ---------------- REMOVER LINHA ---------------- */
+            window.removerLinha = function (btn) {
+                btn.parentNode.parentNode.remove();
+                calcularTotal();
+            };
+
+            /* ---------------- CALCULAR TOTAL ---------------- */
+            window.calcularTotal = function () {
+                let total = 0;
+
+                document.querySelectorAll("#materialsTable tr").forEach((linha, index) => {
+                    if (index === 0) return;
+
+                    const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
+                    const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
+                    const subtotal = qtd * valor;
+
+                    linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+                    total += subtotal;
+                });
+
+                document.getElementById("totalValue").innerText = total.toFixed(2);
+            };
+
+            /* ---------------- ENVIAR FORMULÁRIO ---------------- */
+            btnEnviar.addEventListener("click", enviarFormulario);
+
+            async function enviarFormulario() {
+                try {
+
+                    /* -------- CAMPOS -------- */
+                    const tec_nome = document.getElementById("tec_nome").value;
+                    const uf = document.getElementById("uf").value;
+                    const data_desc = document.getElementById("data_desc").value;
+                    const motivo = document.getElementById("motivoSelect").value;
+
+                    const responsavel = document.getElementById("resp").value;
+                    const justificativa = document.getElementById("just").value;
+
+                    if (!tec_nome || !uf || !data_desc || !motivo) {
+                        alert("Preencha todos os campos obrigatórios.");
+                        return;
+                    }
+
+                    /* -------- MATERIAIS -------- */
+                    const materiais = [];
+
+                    document.querySelectorAll("#materialsTable tr").forEach((linha, index) => {
+                        if (index === 0) return;
+
+                        const desc = linha.querySelector(".desc")?.value;
+                        const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
+                        const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
+
+                        if (desc && qtd > 0 && valor > 0) {
+                            materiais.push({
+                                descricao: desc,
+                                quantidade: qtd,
+                                valor_unitario: valor,
+                                subtotal: qtd * valor
+                            });
+                        }
+                    });
+
+                    const valor_total = materiais.reduce((acc, m) => acc + m.subtotal, 0);
+
+                    /* -------- UPLOAD CARTA PDF -------- */
+                    const pdfFile = document.getElementById("pdf").files[0];
+                    let pdf_url = null;
+
+                    if (pdfFile) {
+                        const pdfPath = `carta_desconto/${Date.now()}.pdf`;
+
+                        const { error } = await supabase.storage
+                            .from("descontos")
+                            .upload(pdfPath, pdfFile);
+
+                        if (!error) {
+                            pdf_url = supabase.storage
+                                .from("descontos")
+                                .getPublicUrl(pdfPath).data.publicUrl;
+                        }
+                    }
+
+                    /* -------- UPLOAD COMPROVANTE PDF -------- */
+                    const comprovanteFile = document.getElementById("comprovantes").files[0];
+                    let comprovante_url = null;
+
+                    if (comprovanteFile) {
+                        const filePath = `comprovantes/${Date.now()}_comprovante.pdf`;
+
+                        const { error } = await supabase.storage
+                            .from("descontos")
+                            .upload(filePath, comprovanteFile);
+
+                        if (!error) {
+                            comprovante_url = supabase.storage
+                                .from("descontos")
+                                .getPublicUrl(filePath).data.publicUrl;
+                        }
+                    }
+
+                    /* -------- SALVAR NO BANCO -------- */
+                    const { error: insertError } = await supabase
+                        .from("descontos")
+                        .insert({
+                            tec_nome,
+                            uf,
+                            data_desc,
+                            motivo,
+                            vivo: null,
+                            rh: null,
+                            assinatura: null,
+                            materiais,
+                            valor_total,
+                            responsavel,
+                            justificativa,
+                            pdf_url,
+                            imagens_url: comprovante_url ? [comprovante_url] : []
+                        });
+
+                    if (insertError) {
+                        console.error(insertError);
+                        alert("Erro ao salvar no banco.");
+                        return;
+                    }
+
+                    /* -------- SUCESSO -------- */
+                    document.getElementById("successBox").style.display = "block";
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+
+                    document.getElementById("formulario").reset();
+
+                    document.getElementById("materialsTable").innerHTML = `
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Qtd.</th>
+                            <th>Valor Unitário (R$)</th>
+                            <th>Subtotal</th>
+                            <th>Ação</th>
+                        </tr>
+                    `;
+
+                    document.getElementById("totalValue").innerText = "0.00";
+
+                    setTimeout(() => {
+                        document.getElementById("successBox").style.display = "none";
+                    }, 4000);
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Erro inesperado ao enviar o formulário.");
+                }
+            }
+        });
+    </script>
 </body>
+
 </html>
+
 
 
 
