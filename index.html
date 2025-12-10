@@ -255,6 +255,7 @@ textarea {
         <table class="materials-table" id="materialsTable">
             <tr>
                 <th>Descrição</th>
+                <th>Qtd.</th>
                 <th>Valor (R$)</th>
                 <th>Ação</th>
             </tr>
@@ -305,30 +306,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let imagensSelecionadas = [];
 
+    /* ---------- ADICIONAR LINHA ---------- */
     btnAdd.addEventListener('click', function () {
         const table = document.getElementById("materialsTable");
         const row = table.insertRow();
         row.innerHTML = `
             <td><input type="text" class="desc"></td>
+            <td><input type="number" class="qtd" min="1" value="1" oninput="calcularTotal()"></td>
             <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
             <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
         `;
     });
 
+    /* ---------- REMOVER LINHA ---------- */
     window.removerLinha = function (btn) {
         btn.parentNode.parentNode.remove();
         calcularTotal();
     };
 
+    /* ---------- CALCULAR TOTAL ---------- */
     window.calcularTotal = function () {
         let total = 0;
-        document.querySelectorAll(".valor").forEach(v => {
-            if (v.value) total += parseFloat(v.value);
+
+        document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
+            if (i === 0) return;
+
+            const qtd = linha.querySelector(".qtd")?.value;
+            const valor = linha.querySelector(".valor")?.value;
+
+            if (qtd && valor) {
+                total += (parseFloat(qtd) * parseFloat(valor));
+            }
         });
+
         document.getElementById("totalValue").innerText = total.toFixed(2);
     };
 
-    /* ---------- PREVIEW DAS IMAGENS ---------- */
+    /* ---------- PREVIEW IMAGENS ---------- */
     comprovantesInput.addEventListener('change', function () {
         const arquivos = Array.from(this.files);
 
@@ -390,17 +404,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const materiais = [];
             document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
                 if (i === 0) return;
+
                 const desc = linha.querySelector(".desc")?.value;
+                const qtd = linha.querySelector(".qtd")?.value;
                 const valor = linha.querySelector(".valor")?.value;
-                if (desc && valor) {
+
+                if (desc && qtd && valor) {
                     materiais.push({
                         descricao: desc,
+                        qtd: parseInt(qtd),
                         valor: parseFloat(valor)
                     });
                 }
             });
 
-            const valor_total = materiais.reduce((acc, m) => acc + m.valor, 0);
+            const valor_total = materiais.reduce((acc, m) => acc + (m.qtd * m.valor), 0);
 
             /* -------- UPLOAD PDF -------- */
             const pdfFile = document.getElementById("pdf").files[0];
@@ -413,7 +431,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     .upload(pdfPath, pdfFile);
 
                 if (!error) {
-                    pdf_url = supabase.storage.from("descontos").getPublicUrl(pdfPath).data.publicUrl;
+                    pdf_url =
+                        supabase.storage.from("descontos").getPublicUrl(pdfPath).data.publicUrl;
                 }
             }
 
@@ -427,7 +446,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     .upload(filePath, img.file);
 
                 if (!error) {
-                    const url = supabase.storage.from("descontos").getPublicUrl(filePath).data.publicUrl;
+                    const url =
+                        supabase.storage.from("descontos").getPublicUrl(filePath).data.publicUrl;
                     imagens_url.push(url);
                 }
             }
@@ -469,6 +489,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById("materialsTable").innerHTML = `
                 <tr>
                     <th>Descrição</th>
+                    <th>Qtd.</th>
                     <th>Valor (R$)</th>
                     <th>Ação</th>
                 </tr>
@@ -491,6 +512,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
+
 
 
 
