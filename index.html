@@ -5,7 +5,6 @@
 <title>Formulário Controle de Desconto RJ x ES</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- SDK Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -153,6 +152,7 @@ textarea {
     text-align: center;
 }
 
+/* Os estilos abaixo não terão efeito prático, mas são mantidos */
 .image-preview-box {
     display: flex;
     flex-wrap: wrap;
@@ -255,10 +255,10 @@ textarea {
         <label>Carta de Desconto (PDF)</label>
         <input type="file" id="pdf" accept="application/pdf">
 
-        <label>Comprovante de Recebimento (Imagens Ilimitadas)</label>
-        <input type="file" id="comprovantes" accept="image/*" multiple>
+        <label>Comprovante de Recebimento (PDF)</label>
+        <input type="file" id="comprovantes" accept="application/pdf">
 
-        <div id="preview" class="image-preview-box"></div>
+        <div id="preview" class="image-preview-box" style="display:none;"></div> 
 
         <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
 
@@ -270,7 +270,7 @@ textarea {
    CONFIGURAÇÃO SUPABASE
 -------------------------------------------------------- */
 const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxCckYBmxUPvdXHjNtso";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -279,9 +279,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const btnAdd = document.getElementById('btnAddMaterial');
     const btnEnviar = document.getElementById('btnEnviar');
-    const comprovantesInput = document.getElementById('comprovantes');
+    const comprovantesInput = document.getElementById('comprovantes'); // Agora um PDF
 
-    let imagensSelecionadas = [];
+    // Variável de imagensSelecionadas e lógica de preview removidas, pois não se aplicam a PDFs únicos
 
     /* ----------------- ADICIONAR LINHA ------------------ */
     btnAdd.addEventListener('click', function () {
@@ -290,13 +290,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         row.innerHTML = `
             <td><input type="text" class="desc"></td>
-
             <td><input type="number" class="qtd" min="1" placeholder="" oninput="calcularTotal()"></td>
-
             <td><input type="number" class="valor" step="0.01" oninput="calcularTotal()"></td>
-
             <td><span class="subtotal">0.00</span></td>
-
             <td><button type="button" onclick="removerLinha(this)">Remover</button></td>
         `;
     });
@@ -326,41 +322,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById("totalValue").innerText = total.toFixed(2);
     };
 
-    /* ---------- PREVIEW DAS IMAGENS ---------- */
-    comprovantesInput.addEventListener('change', function () {
-        const arquivos = Array.from(this.files);
-
-        arquivos.forEach(arq => {
-            const leitor = new FileReader();
-            leitor.onload = function (ev) {
-                imagensSelecionadas.push({ file: arq, preview: ev.target.result });
-                atualizarPreview();
-            };
-            leitor.readAsDataURL(arq);
-        });
-    });
-
-    function atualizarPreview() {
-        const preview = document.getElementById('preview');
-        preview.innerHTML = '';
-
-        imagensSelecionadas.forEach((img, index) => {
-            const div = document.createElement('div');
-            div.className = 'image-item';
-
-            div.innerHTML = `
-                <img src="${img.preview}">
-                <button class="remove-img" type="button" onclick="removerImagem(${index})">X</button>
-            `;
-
-            preview.appendChild(div);
-        });
-    }
-
-    window.removerImagem = function (index) {
-        imagensSelecionadas.splice(index, 1);
-        atualizarPreview();
-    };
+    /* ---------- PREVIEW DAS IMAGENS (REMOVIDO) ---------- */
+    // A lógica de comprovantesInput.addEventListener('change', ...) e as funções atualizarPreview/removerImagem foram removidas.
 
     /* ---------- ENVIO DO FORMULÁRIO ---------- */
     btnEnviar.addEventListener('click', enviarFormulario);
@@ -372,9 +335,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const uf = document.getElementById("uf").value;
             const data_desc = document.getElementById("data_desc").value;
             const motivo = document.getElementById("motivoSelect").value;
-            const vivo = document.getElementById("vivo").value;
-            const rh = document.getElementById("rh").value;
-            const assinatura = document.getElementById("assinatura").value;
+            
+            // Variáveis não presentes no HTML, definidas como null para evitar erro:
+            const vivo = document.getElementById("vivo") ? document.getElementById("vivo").value : null;
+            const rh = document.getElementById("rh") ? document.getElementById("rh").value : null;
+            const assinatura = document.getElementById("assinatura") ? document.getElementById("assinatura").value : null;
+            
             const responsavel = document.getElementById("resp").value;
             const justificativa = document.getElementById("just").value;
 
@@ -405,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const valor_total = materiais.reduce((acc, m) => acc + m.subtotal, 0);
 
-            /* -------- UPLOAD PDF -------- */
+            /* -------- UPLOAD PDF (Carta de Desconto - mantido) -------- */
             const pdfFile = document.getElementById("pdf").files[0];
             let pdf_url = null;
 
@@ -420,21 +386,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            /* -------- UPLOAD IMAGENS -------- */
-            let imagens_url = [];
+            /* -------- UPLOAD COMPROVANTE (AGORA PDF) -------- */
+            const comprovanteFile = comprovantesInput.files[0];
+            let comprovante_url = null; 
 
-            for (const img of imagensSelecionadas) {
-                const filePath = `imagens/${Date.now()}_${img.file.name}`;
+            if (comprovanteFile) {
+                const comprovantePath = `comprovantes/${Date.now()}_comprovante.pdf`;
                 const { error } = await supabase.storage
                     .from("descontos")
-                    .upload(filePath, img.file);
+                    .upload(comprovantePath, comprovanteFile);
 
                 if (!error) {
-                    const url = supabase.storage.from("descontos").getPublicUrl(filePath).data.publicUrl;
-                    imagens_url.push(url);
+                    comprovante_url = supabase.storage.from("descontos").getPublicUrl(comprovantePath).data.publicUrl;
                 }
             }
-
+            
             /* -------- SALVAR NO BANCO -------- */
             const { error: insertError } = await supabase
                 .from("descontos")
@@ -451,7 +417,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     responsavel,
                     justificativa,
                     pdf_url,
-                    imagens_url
+                    // imagens_url (antigo campo para array de imagens) foi substituído por:
+                    comprovante_url // Novo campo para o URL do PDF de comprovante
                 });
 
             if (insertError) {
@@ -465,8 +432,7 @@ document.addEventListener('DOMContentLoaded', function () {
             window.scrollTo({ top: 0, behavior: "smooth" });
 
             document.getElementById("formulario").reset();
-            imagensSelecionadas = [];
-            atualizarPreview();
+            // Lógica de reset de imagensSelecionadas e atualizarPreview foi removida/não é necessária.
 
             document.getElementById("materialsTable").innerHTML = `
                 <tr>
@@ -477,7 +443,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <th>Ação</th>
                 </tr>
             `;
-
             document.getElementById("totalValue").innerText = "0.00";
 
             setTimeout(() => {
