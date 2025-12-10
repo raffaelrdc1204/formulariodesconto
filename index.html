@@ -216,6 +216,22 @@ textarea {
         <label>Data do Desconto</label>
         <input type="date" id="data_desc">
 
+        <!-- NOVO CAMPO 1 -->
+        <label>Descontado pela Vivo?</label>   <!-- ADICIONADO -->
+        <select id="vivo">                    <!-- ADICIONADO -->
+            <option value="">Selecione...</option>
+            <option value="sim">Sim</option>
+            <option value="não">Não</option>
+        </select>
+
+        <!-- NOVO CAMPO 2 -->
+        <label>Desconto RH?</label>           <!-- ADICIONADO -->
+        <select id="rh">                     <!-- ADICIONADO -->
+            <option value="">Selecione...</option>
+            <option value="sim">Sim</option>
+            <option value="não">Não</option>
+        </select>
+
         <label>Motivo do Desconto</label>
         <select id="motivoSelect">
             <option value="">Selecione...</option>
@@ -367,18 +383,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function enviarFormulario() {
         try {
-            /* -------- CAPTURAR CAMPOS -------- */
+            /* -------- CAMPOS NOVOS ADICIONADOS -------- */
+            const vivo = document.getElementById("vivo").value;   // 🔵 ADICIONADO
+            const rh = document.getElementById("rh").value;       // 🔵 ADICIONADO
+
             const tec_nome = document.getElementById("tec_nome").value;
             const uf = document.getElementById("uf").value;
             const data_desc = document.getElementById("data_desc").value;
             const motivo = document.getElementById("motivoSelect").value;
-            const vivo = document.getElementById("vivo").value;
-            const rh = document.getElementById("rh").value;
-            const assinatura = document.getElementById("assinatura").value;
             const responsavel = document.getElementById("resp").value;
             const justificativa = document.getElementById("just").value;
 
-            if (!tec_nome || !uf || !data_desc || !motivo) {
+            if (!tec_nome || !uf || !data_desc || !motivo || !vivo || !rh) {
                 alert("Preencha todos os campos obrigatórios.");
                 return;
             }
@@ -443,9 +459,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     uf,
                     data_desc,
                     motivo,
-                    vivo,
-                    rh,
-                    assinatura,
+                    vivo,      // 🔵 ADICIONADO
+                    rh,        // 🔵 ADICIONADO
                     materiais,
                     valor_total,
                     responsavel,
@@ -495,6 +510,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
+
 
 
 
