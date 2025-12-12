@@ -267,15 +267,13 @@ textarea {
         <label>Carta de Desconto (PDF)</label>
         <input type="file" id="pdf" accept="application/pdf">
 
-        <label>Comprovante de Recebimento (PDF)</label>
+        <label>Comprovante de Recebimento (PDF SOMENTE)</label>
         <input type="file" id="comprovantes" accept="application/pdf" multiple>
 
         <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
 
     </form>
 </div>
-
-<script>
 
 <script>
 
@@ -289,7 +287,7 @@ const SUPABASE_KEY = "sb_publishable_8Xt8BY8UGD9rYy9A4CPTfQ_3dXwqiRL";
 const cliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ======================================================
-        INICIALIZAÇÃO
+        FUNÇÕES
 ====================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -308,7 +306,7 @@ function addMaterialRow() {
 
     row.innerHTML = `
         <td><input type="text" class="desc" placeholder="Descrição"></td>
-        <td><input type="number" class="qtd" min="0" value="0" oninput="calcularTotal()"></td>
+        <td><input type="number" class="qtd" min="1" value="1" oninput="calcularTotal()"></td>
         <td><input type="number" class="valor" value="0.00" step="0.01" oninput="calcularTotal()"></td>
         <td><span class="subtotal">0.00</span></td>
         <td><button type="button" class="remove-line-btn">Remover</button></td>
@@ -321,7 +319,7 @@ function addMaterialRow() {
 }
 
 /* ======================================================
-        CALCULAR TOTAL
+    CALCULAR TOTAL
 ====================================================== */
 
 function calcularTotal() {
@@ -332,9 +330,10 @@ function calcularTotal() {
 
         const qtd = parseFloat(linha.querySelector(".qtd").value) || 0;
         const valor = parseFloat(linha.querySelector(".valor").value) || 0;
-        const subtotal = qtd * valor;
 
+        const subtotal = qtd * valor;
         linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+
         total += subtotal;
     });
 
@@ -342,39 +341,14 @@ function calcularTotal() {
 }
 
 /* ======================================================
-        UPLOAD DE UM ARQUIVO
-====================================================== */
-
-async function uploadArquivo(pasta, arquivo) {
-
-    const caminho = `${pasta}/${Date.now()}_${arquivo.name}`;
-
-    // upload
-    const { error: erroUpload } = await cliente.storage
-        .from("descontos")
-        .upload(caminho, arquivo);
-
-    if (erroUpload) {
-        console.error("Erro no upload:", erroUpload.message);
-        return null;
-    }
-
-    // obter URL pública
-    const { data } = cliente.storage
-        .from("descontos")
-        .getPublicUrl(caminho);
-
-    return data.publicUrl;
-}
-
-/* ======================================================
-        ENVIAR FORMULÁRIO
+    ENVIAR FORMULÁRIO
 ====================================================== */
 
 async function enviarFormulario() {
 
     const success = document.getElementById("successBox");
     const error = document.getElementById("errorBox");
+
     success.style.display = "none";
     error.style.display = "none";
 
@@ -384,7 +358,7 @@ async function enviarFormulario() {
 
     try {
 
-        /* VALIDAR CAMPOS */
+        /* Campos obrigatórios */
         const tec_nome = document.getElementById("tec_nome").value.trim();
         const uf = document.getElementById("uf").value;
         const data_desc = document.getElementById("data_desc").value;
@@ -396,7 +370,7 @@ async function enviarFormulario() {
             throw new Error("Preencha todos os campos obrigatórios!");
         }
 
-        /* MONTAR LISTA DE MATERIAIS */
+        /* Materiais */
         const materiais = [];
         document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
             if (i === 0) return;
@@ -419,70 +393,63 @@ async function enviarFormulario() {
         const responsavel = document.getElementById("resp").value.trim();
         const justificativa = document.getElementById("just").value.trim();
 
-        /* ======================================================
-                UPLOAD DA CARTA (PDF)
-        ======================================================= */
-
+        /* UPLOAD PDF CARTA */
         let pdf_url = null;
-        const cartaPDF = document.getElementById("pdf").files[0];
+        const pdf = document.getElementById("pdf").files[0];
 
-        if (cartaPDF) {
-            if (cartaPDF.type !== "application/pdf") {
-                throw new Error("A carta deve ser um arquivo PDF!");
+        if (pdf) {
+            if (pdf.type !== "application/pdf") {
+                throw new Error("A carta de desconto deve estar em PDF!");
             }
-            pdf_url = await uploadArquivo("pdfs", cartaPDF);
+
+            const nome = `pdfs/${Date.now()}_${pdf.name}`;
+
+            const { error: upErr } = await cliente.storage
+                .from("descontos")
+                .upload(nome, pdf);
+
+            if (!upErr) {
+                const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
+                pdf_url = data.publicUrl;
+            }
         }
 
-        /* ======================================================
-                UPLOAD COMPROVANTES (PDFS)
-        ======================================================= */
-
+        /* UPLOAD COMPROVANTES (PDF Somente) */
         let comprovantes_urls = [];
         const arquivos = Array.from(document.getElementById("comprovantes").files);
 
-        for (const arq of arquivos) {
-            if (arq.type !== "application/pdf") {
+        for (const arquivo of arquivos) {
+            if (arquivo.type !== "application/pdf") {
                 throw new Error("Todos os comprovantes devem estar em PDF!");
             }
 
-            const link = await uploadArquivo("comprovantes", arq);
-            if (link) comprovantes_urls.push(link);
+            const nome = `comprovantes/${Date.now()}_${arquivo.name}`;
+
+            const { error: uErr } = await cliente.storage
+                .from("descontos")
+                .upload(nome, arquivo);
+
+            if (!uErr) {
+                const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
+                comprovantes_urls.push(data.publicUrl);
+            }
         }
 
-        // Se não tiver PDFs, salva como NULL em vez de array vazio
-        if (comprovantes_urls.length === 0) {
-            comprovantes_urls = null;
-        }
-
-        /* ======================================================
-                SALVAR NO BANCO
-        ======================================================= */
-
-        const registro = {
-            tec_nome,
-            uf,
-            data_desc,
-            motivo,
-            vivo,
-            rh,
-            materiais,
-            valor_total,
-            pdf_url,
-            comprovantes_urls,
-            responsavel,
-            justificativa,
+        /* SALVAR NO BANCO */
+        const payload = {
+            tec_nome, uf, data_desc, motivo, vivo, rh,
+            materiais, valor_total, responsavel, justificativa,
+            pdf_url, comprovantes_urls,
             created_at: new Date().toISOString()
         };
 
-        const { error: insertErr } = await cliente
-            .from("descontos")
-            .insert(registro);
+        const { error: insertErr } = await cliente.from("descontos").insert(payload);
 
         if (insertErr) throw insertErr;
 
         /* SUCESSO */
         success.style.display = "block";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         document.getElementById("formulario").reset();
         document.getElementById("materialsTable").innerHTML = `
@@ -494,23 +461,27 @@ async function enviarFormulario() {
                 <th>Ação</th>
             </tr>
         `;
+
         addMaterialRow();
         calcularTotal();
 
-    } catch (err) {
+        setTimeout(() => success.style.display = "none", 3000);
 
-        error.innerText = err.message;
+    } catch (err) {
         error.style.display = "block";
+        error.innerText = err.message;
 
     } finally {
-
         btn.disabled = false;
         btn.innerText = "Enviar Formulário";
-
     }
 }
 
 </script>
+
+</body>
+</html>
+
 
 
 
