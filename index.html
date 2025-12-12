@@ -517,10 +517,14 @@ async function enviarFormulario() {
         if (insertErr) throw insertErr;
 
         /* SUCESSO */
-        success.style.display = "block";
-        document.getElementById("formulario").reset();
-        imagensSelecionadas = [];
-        atualizarPreview();
+success.style.display = "block";
+
+/* 🔹 Rola para o topo da página */
+window.scrollTo({ top: 0, behavior: 'smooth' });
+
+document.getElementById("formulario").reset();
+imagensSelecionadas = [];
+atualizarPreview();
 
         document.getElementById("materialsTable").innerHTML = `
             <tr>
@@ -550,6 +554,7 @@ async function enviarFormulario() {
 
 </body>
 </html>
+
 
 
 
