@@ -183,39 +183,6 @@ textarea {
     padding: 12px;
     border-radius: 8px;
 }
-
-.image-preview-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 10px;
-}
-
-.image-item {
-    position: relative;
-    width: 130px;
-    height: 130px;
-}
-
-.image-item img {
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
-.remove-img {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #D9534F;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    cursor: pointer;
-}
 </style>
 </head>
 
@@ -300,9 +267,8 @@ textarea {
         <label>Carta de Desconto (PDF)</label>
         <input type="file" id="pdf" accept="application/pdf">
 
-        <label>Comprovante de Recebimento (Imagens Ilimitadas)</label>
-        <input type="file" id="comprovantes" accept="image/*" multiple>
-        <div id="preview" class="image-preview-box"></div>
+        <label>Comprovante de Recebimento (PDF SOMENTE)</label>
+        <input type="file" id="comprovantes" accept="application/pdf" multiple>
 
         <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
 
@@ -324,14 +290,9 @@ const cliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         FUNÇÕES
 ====================================================== */
 
-let imagensSelecionadas = [];
-
 document.addEventListener("DOMContentLoaded", () => {
-
     document.getElementById("btnAddMaterial").addEventListener("click", addMaterialRow);
     document.getElementById("btnEnviar").addEventListener("click", enviarFormulario);
-    document.getElementById("comprovantes").addEventListener("change", handleImagens);
-
     addMaterialRow();
 });
 
@@ -377,45 +338,6 @@ function calcularTotal() {
     });
 
     document.getElementById("totalValue").innerText = total.toFixed(2);
-}
-
-/* ======================================================
-    TRATAMENTO DAS IMAGENS
-====================================================== */
-
-function handleImagens(e) {
-    const arquivos = Array.from(e.target.files);
-
-    arquivos.forEach(file => {
-        const leitor = new FileReader();
-        leitor.onload = ev => {
-            imagensSelecionadas.push({ file, preview: ev.target.result });
-            atualizarPreview();
-        };
-        leitor.readAsDataURL(file);
-    });
-}
-
-function atualizarPreview() {
-    const box = document.getElementById("preview");
-    box.innerHTML = "";
-
-    imagensSelecionadas.forEach((img, index) => {
-        const div = document.createElement("div");
-        div.className = "image-item";
-
-        div.innerHTML = `
-            <img src="${img.preview}">
-            <button type="button" class="remove-img" onclick="removerImagem(${index})">X</button>
-        `;
-
-        box.appendChild(div);
-    });
-}
-
-function removerImagem(index) {
-    imagensSelecionadas.splice(index, 1);
-    atualizarPreview();
 }
 
 /* ======================================================
@@ -471,36 +393,45 @@ async function enviarFormulario() {
         const responsavel = document.getElementById("resp").value.trim();
         const justificativa = document.getElementById("just").value.trim();
 
-        /* UPLOAD PDF */
+        /* UPLOAD PDF CARTA */
         let pdf_url = null;
         const pdf = document.getElementById("pdf").files[0];
 
         if (pdf) {
+            if (pdf.type !== "application/pdf") {
+                throw new Error("A carta de desconto deve estar em PDF!");
+            }
+
             const nome = `pdfs/${Date.now()}_${pdf.name}`;
 
             const { error: upErr } = await cliente.storage
                 .from("descontos")
                 .upload(nome, pdf);
 
-            if (upErr) console.error(upErr);
-
-            const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
-            pdf_url = data.publicUrl;
+            if (!upErr) {
+                const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
+                pdf_url = data.publicUrl;
+            }
         }
 
-        /* UPLOAD IMAGENS */
-        let imagens_url = [];
+        /* UPLOAD COMPROVANTES (PDF Somente) */
+        let comprovantes_urls = [];
+        const arquivos = Array.from(document.getElementById("comprovantes").files);
 
-        for (const imagem of imagensSelecionadas) {
-            const nome = `imagens/${Date.now()}_${imagem.file.name}`;
+        for (const arquivo of arquivos) {
+            if (arquivo.type !== "application/pdf") {
+                throw new Error("Todos os comprovantes devem estar em PDF!");
+            }
+
+            const nome = `comprovantes/${Date.now()}_${arquivo.name}`;
 
             const { error: uErr } = await cliente.storage
                 .from("descontos")
-                .upload(nome, imagem.file);
+                .upload(nome, arquivo);
 
             if (!uErr) {
                 const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
-                imagens_url.push(data.publicUrl);
+                comprovantes_urls.push(data.publicUrl);
             }
         }
 
@@ -508,7 +439,7 @@ async function enviarFormulario() {
         const payload = {
             tec_nome, uf, data_desc, motivo, vivo, rh,
             materiais, valor_total, responsavel, justificativa,
-            pdf_url, imagens_url,
+            pdf_url, comprovantes_urls,
             created_at: new Date().toISOString()
         };
 
@@ -517,15 +448,10 @@ async function enviarFormulario() {
         if (insertErr) throw insertErr;
 
         /* SUCESSO */
-success.style.display = "block";
+        success.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-/* 🔹 Rola para o topo da página */
-window.scrollTo({ top: 0, behavior: 'smooth' });
-
-document.getElementById("formulario").reset();
-imagensSelecionadas = [];
-atualizarPreview();
-
+        document.getElementById("formulario").reset();
         document.getElementById("materialsTable").innerHTML = `
             <tr>
                 <th>Descrição</th>
@@ -535,6 +461,7 @@ atualizarPreview();
                 <th>Ação</th>
             </tr>
         `;
+
         addMaterialRow();
         calcularTotal();
 
@@ -554,6 +481,8 @@ atualizarPreview();
 
 </body>
 </html>
+
+
 
 
 
