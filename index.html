@@ -21,6 +21,8 @@ body {
     padding: 0;
 }
 
+/* ====================== ESTILOS ========================== */
+
 .header {
     width: 100%;
     padding: 40px 20px;
@@ -90,6 +92,7 @@ textarea {
     min-height: 90px;
 }
 
+/* TABELA */
 .materials-table {
     width: 100%;
     border-collapse: collapse;
@@ -114,6 +117,15 @@ textarea {
     width: 100%;
     box-sizing: border-box;
     padding: 8px;
+}
+
+.remove-line-btn {
+    background: #D9534F;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
 .btn-add {
@@ -204,12 +216,6 @@ textarea {
     height: 26px;
     cursor: pointer;
 }
-
-.small-muted {
-    font-size: 13px;
-    color: #6b7280;
-    margin-top: 6px;
-}
 </style>
 </head>
 
@@ -225,10 +231,11 @@ textarea {
     <div id="errorBox" class="error-box"></div>
 
     <form id="formulario" onsubmit="return false;">
+
         <div class="section-title">Dados do Técnico</div>
 
         <label>Nome do Técnico *</label>
-        <input type="text" id="tec_nome" autocomplete="off">
+        <input type="text" id="tec_nome">
 
         <label>UF *</label>
         <select id="uf">
@@ -295,190 +302,255 @@ textarea {
 
         <label>Comprovante de Recebimento (Imagens Ilimitadas)</label>
         <input type="file" id="comprovantes" accept="image/*" multiple>
-        <div class="small-muted">Selecione quantas imagens quiser. O upload pode demorar dependendo do tamanho.</div>
         <div id="preview" class="image-preview-box"></div>
 
         <button class="submit-btn" id="btnEnviar" type="button">Enviar Formulário</button>
+
     </form>
 </div>
 
 <script>
+
+/* ======================================================
+       CONFIG SUPABASE
+====================================================== */
+
 const SUPABASE_URL = "https://qdepfsguebkfemeuybwl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi6InFkZXBmc2d1ZWJrZmVtZXV5YndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzY5MDMsImV4cCI6MjA4MDcxMjkwM30.43h0OG4Dh7egY1KkW_PnHa2yxKckYBmxUPvdXHjNtso";
-const BUCKET_NAME = "descontos";
+const SUPABASE_KEY = "sb_publishable_8Xt8BY8UGD9rYy9A4CPTfQ_3dXwqiRL";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const cliente = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-document.addEventListener('DOMContentLoaded', function () {
-    const btnAdd = document.getElementById('btnAddMaterial');
-    const btnEnviar = document.getElementById('btnEnviar');
-    const comprovantesInput = document.getElementById('comprovantes');
-    const successBox = document.getElementById('successBox');
-    const errorBox = document.getElementById('errorBox');
+/* ======================================================
+        FUNÇÕES
+====================================================== */
 
-    let imagensSelecionadas = [];
+let imagensSelecionadas = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.getElementById("btnAddMaterial").addEventListener("click", addMaterialRow);
+    document.getElementById("btnEnviar").addEventListener("click", enviarFormulario);
+    document.getElementById("comprovantes").addEventListener("change", handleImagens);
 
     addMaterialRow();
-    btnAdd.addEventListener('click', addMaterialRow);
+});
 
-    function addMaterialRow() {
-        const table = document.getElementById("materialsTable");
-        const row = table.insertRow();
-        row.innerHTML = `
-            <td><input type="text" class="desc" placeholder="Descrição do item"></td>
-            <td><input type="number" class="qtd" min="1" placeholder="1" value="1" oninput="calcularTotal()"></td>
-            <td><input type="number" class="valor" step="0.01" placeholder="0.00" value="0.00" oninput="calcularTotal()"></td>
-            <td><span class="subtotal">0.00</span></td>
-            <td><button type="button" class="remove-line-btn">Remover</button></td>
-        `;
-        row.querySelector('.remove-line-btn').addEventListener('click', function () {
-            row.remove();
-            calcularTotal();
-        });
-    }
+/* ======================================================
+    ADICIONAR LINHA NA TABELA
+====================================================== */
 
-    window.calcularTotal = function () {
-        let total = 0;
-        document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
-            if (i === 0) return;
-            const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
-            const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
-            const subtotal = (isFinite(qtd) && isFinite(valor)) ? qtd * valor : 0;
-            linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
-            total += subtotal;
-        });
-        document.getElementById("totalValue").innerText = total.toFixed(2);
-    };
+function addMaterialRow() {
+    const tabela = document.getElementById("materialsTable");
+    const row = tabela.insertRow();
 
-    comprovantesInput.addEventListener('change', function () {
-        const arquivos = Array.from(this.files || []);
-        arquivos.forEach(arq => {
-            if (!arq.type.startsWith('image/')) return;
-            const leitor = new FileReader();
-            leitor.onload = function (ev) {
-                imagensSelecionadas.push({ file: arq, preview: ev.target.result });
-                atualizarPreview();
-            };
-            leitor.readAsDataURL(arq);
-        });
-        this.value = '';
+    row.innerHTML = `
+        <td><input type="text" class="desc" placeholder="Descrição"></td>
+        <td><input type="number" class="qtd" min="1" value="1" oninput="calcularTotal()"></td>
+        <td><input type="number" class="valor" value="0.00" step="0.01" oninput="calcularTotal()"></td>
+        <td><span class="subtotal">0.00</span></td>
+        <td><button type="button" class="remove-line-btn">Remover</button></td>
+    `;
+
+    row.querySelector(".remove-line-btn").addEventListener("click", () => {
+        row.remove();
+        calcularTotal();
+    });
+}
+
+/* ======================================================
+    CALCULAR TOTAL
+====================================================== */
+
+function calcularTotal() {
+    let total = 0;
+
+    document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
+        if (i === 0) return;
+
+        const qtd = parseFloat(linha.querySelector(".qtd").value) || 0;
+        const valor = parseFloat(linha.querySelector(".valor").value) || 0;
+
+        const subtotal = qtd * valor;
+        linha.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+
+        total += subtotal;
     });
 
-    function atualizarPreview() {
-        const preview = document.getElementById('preview');
-        preview.innerHTML = '';
-        imagensSelecionadas.forEach((img, index) => {
-            const div = document.createElement('div');
-            div.className = 'image-item';
-            div.innerHTML = `
-                <img src="${img.preview}" alt="Comprovante ${index+1}">
-                <button class="remove-img" type="button" onclick="removerImagem(${index})">X</button>
-            `;
-            preview.appendChild(div);
-        });
-    }
+    document.getElementById("totalValue").innerText = total.toFixed(2);
+}
 
-    window.removerImagem = function (index) {
-        imagensSelecionadas.splice(index, 1);
-        atualizarPreview();
-    };
+/* ======================================================
+    TRATAMENTO DAS IMAGENS
+====================================================== */
 
-    btnEnviar.addEventListener('click', enviarFormulario);
+function handleImagens(e) {
+    const arquivos = Array.from(e.target.files);
 
-    async function enviarFormulario() {
-        successBox.style.display = 'none';
-        errorBox.style.display = 'none';
-        errorBox.innerText = '';
-        btnEnviar.disabled = true;
-        btnEnviar.innerText = 'Enviando...';
-
-        try {
-            const tec_nome = document.getElementById("tec_nome").value.trim();
-            const uf = document.getElementById("uf").value.trim();
-            const data_desc = document.getElementById("data_desc").value;
-            const motivo = document.getElementById("motivoSelect").value;
-            const vivo = document.getElementById("vivo").value.trim();
-            const rh = document.getElementById("rh").value.trim();
-            const responsavel = document.getElementById("resp").value.trim();
-            const justificativa = document.getElementById("just").value.trim();
-
-            if (!tec_nome || !uf || !data_desc || !motivo || !vivo || !rh) {
-                throw new Error("Preencha todos os campos obrigatórios (marcados com *).");
-            }
-
-            const materiais = [];
-            document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
-                if (i === 0) return;
-                const desc = linha.querySelector(".desc")?.value?.trim() || '';
-                const qtd = parseFloat(linha.querySelector(".qtd")?.value || 0);
-                const valor = parseFloat(linha.querySelector(".valor")?.value || 0);
-                const subtotal = (isFinite(qtd) && isFinite(valor)) ? qtd * valor : 0;
-                if (desc) materiais.push({ descricao: desc, quantidade: qtd, valor_unitario: valor, subtotal });
-            });
-
-            const valor_total = materiais.reduce((acc, m) => acc + (m.subtotal || 0), 0);
-
-            // UPLOAD PDF
-            const pdfFile = document.getElementById("pdf").files[0];
-            let pdf_url = null;
-            if (pdfFile) {
-                const safeName = `pdfs/pdf_${Date.now()}_${encodeURIComponent(pdfFile.name)}`;
-                const { error: uploadError } = await supabase.storage
-                    .from(BUCKET_NAME)
-                    .upload(safeName, pdfFile, { cacheControl: '3600', upsert: false });
-                if (!uploadError) {
-                    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
-                    pdf_url = urlData?.publicUrl || null;
-                }
-            }
-
-            // UPLOAD IMAGENS
-            let imagens_url = [];
-            for (const img of imagensSelecionadas) {
-                const safeName = `imagens/${Date.now()}_${encodeURIComponent(img.file.name)}`;
-                const { error: err } = await supabase.storage
-                    .from(BUCKET_NAME)
-                    .upload(safeName, img.file, { cacheControl: '3600', upsert: false });
-                if (!err) {
-                    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(safeName);
-                    imagens_url.push(urlData?.publicUrl || null);
-                }
-            }
-
-            const payload = { tec_nome, uf, data_desc, motivo, vivo, rh, materiais, valor_total, responsavel, justificativa, pdf_url, imagens_url, created_at: new Date().toISOString() };
-            const { error: insertError } = await supabase.from("descontos").insert([payload]);
-            if (insertError) throw new Error("Erro ao salvar no banco. Veja console para detalhes.");
-
-            successBox.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: "smooth" });
-            document.getElementById("formulario").reset();
-            imagensSelecionadas = [];
+    arquivos.forEach(file => {
+        const leitor = new FileReader();
+        leitor.onload = ev => {
+            imagensSelecionadas.push({ file, preview: ev.target.result });
             atualizarPreview();
-            document.getElementById("materialsTable").innerHTML = `
-                <tr>
-                    <th>Descrição</th>
-                    <th>Qtd.</th>
-                    <th>Valor Unitário (R$)</th>
-                    <th>Subtotal</th>
-                    <th>Ação</th>
-                </tr>`;
-            addMaterialRow();
-            calcularTotal();
-            setTimeout(() => successBox.style.display = 'none', 4000);
+        };
+        leitor.readAsDataURL(file);
+    });
+}
 
-        } catch (err) {
-            errorBox.style.display = 'block';
-            errorBox.innerText = err.message || 'Erro inesperado ao enviar o formulário.';
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        } finally {
-            btnEnviar.disabled = false;
-            btnEnviar.innerText = 'Enviar Formulário';
+function atualizarPreview() {
+    const box = document.getElementById("preview");
+    box.innerHTML = "";
+
+    imagensSelecionadas.forEach((img, index) => {
+        const div = document.createElement("div");
+        div.className = "image-item";
+
+        div.innerHTML = `
+            <img src="${img.preview}">
+            <button type="button" class="remove-img" onclick="removerImagem(${index})">X</button>
+        `;
+
+        box.appendChild(div);
+    });
+}
+
+function removerImagem(index) {
+    imagensSelecionadas.splice(index, 1);
+    atualizarPreview();
+}
+
+/* ======================================================
+    ENVIAR FORMULÁRIO
+====================================================== */
+
+async function enviarFormulario() {
+
+    const success = document.getElementById("successBox");
+    const error = document.getElementById("errorBox");
+
+    success.style.display = "none";
+    error.style.display = "none";
+
+    const btn = document.getElementById("btnEnviar");
+    btn.disabled = true;
+    btn.innerText = "Enviando...";
+
+    try {
+
+        /* Campos obrigatórios */
+        const tec_nome = document.getElementById("tec_nome").value.trim();
+        const uf = document.getElementById("uf").value;
+        const data_desc = document.getElementById("data_desc").value;
+        const motivo = document.getElementById("motivoSelect").value;
+        const vivo = document.getElementById("vivo").value;
+        const rh = document.getElementById("rh").value;
+
+        if (!tec_nome || !uf || !data_desc || !motivo || !vivo || !rh) {
+            throw new Error("Preencha todos os campos obrigatórios!");
         }
+
+        /* Materiais */
+        const materiais = [];
+        document.querySelectorAll("#materialsTable tr").forEach((linha, i) => {
+            if (i === 0) return;
+
+            const desc = linha.querySelector(".desc").value.trim();
+            const qtd = parseFloat(linha.querySelector(".qtd").value) || 0;
+            const valor = parseFloat(linha.querySelector(".valor").value) || 0;
+
+            if (desc) {
+                materiais.push({
+                    descricao: desc,
+                    quantidade: qtd,
+                    valor_unitario: valor,
+                    subtotal: qtd * valor
+                });
+            }
+        });
+
+        const valor_total = materiais.reduce((a, b) => a + b.subtotal, 0);
+        const responsavel = document.getElementById("resp").value.trim();
+        const justificativa = document.getElementById("just").value.trim();
+
+        /* UPLOAD PDF */
+        let pdf_url = null;
+        const pdf = document.getElementById("pdf").files[0];
+
+        if (pdf) {
+            const nome = `pdfs/${Date.now()}_${pdf.name}`;
+
+            const { error: upErr } = await cliente.storage
+                .from("descontos")
+                .upload(nome, pdf);
+
+            if (upErr) console.error(upErr);
+
+            const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
+            pdf_url = data.publicUrl;
+        }
+
+        /* UPLOAD IMAGENS */
+        let imagens_url = [];
+
+        for (const imagem of imagensSelecionadas) {
+            const nome = `imagens/${Date.now()}_${imagem.file.name}`;
+
+            const { error: uErr } = await cliente.storage
+                .from("descontos")
+                .upload(nome, imagem.file);
+
+            if (!uErr) {
+                const { data } = cliente.storage.from("descontos").getPublicUrl(nome);
+                imagens_url.push(data.publicUrl);
+            }
+        }
+
+        /* SALVAR NO BANCO */
+        const payload = {
+            tec_nome, uf, data_desc, motivo, vivo, rh,
+            materiais, valor_total, responsavel, justificativa,
+            pdf_url, imagens_url,
+            created_at: new Date().toISOString()
+        };
+
+        const { error: insertErr } = await cliente.from("descontos").insert(payload);
+
+        if (insertErr) throw insertErr;
+
+        /* SUCESSO */
+        success.style.display = "block";
+        document.getElementById("formulario").reset();
+        imagensSelecionadas = [];
+        atualizarPreview();
+
+        document.getElementById("materialsTable").innerHTML = `
+            <tr>
+                <th>Descrição</th>
+                <th>Qtd.</th>
+                <th>Valor Unitário (R$)</th>
+                <th>Subtotal</th>
+                <th>Ação</th>
+            </tr>
+        `;
+        addMaterialRow();
+        calcularTotal();
+
+        setTimeout(() => success.style.display = "none", 3000);
+
+    } catch (err) {
+        error.style.display = "block";
+        error.innerText = err.message;
+
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Enviar Formulário";
     }
-});
+}
+
 </script>
+
 </body>
 </html>
+
 
 
 
