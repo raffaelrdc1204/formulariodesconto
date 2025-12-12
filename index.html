@@ -306,7 +306,7 @@ function addMaterialRow() {
 
     row.innerHTML = `
         <td><input type="text" class="desc" placeholder="Descrição"></td>
-        <td><input type="number" class="qtd" min="1" value="1" oninput="calcularTotal()"></td>
+        <td><input type="number" class="qtd" min="1" value="0" oninput="calcularTotal()"></td>
         <td><input type="number" class="valor" value="0.00" step="0.01" oninput="calcularTotal()"></td>
         <td><span class="subtotal">0.00</span></td>
         <td><button type="button" class="remove-line-btn">Remover</button></td>
@@ -481,6 +481,7 @@ async function enviarFormulario() {
 
 </body>
 </html>
+
 
 
 
